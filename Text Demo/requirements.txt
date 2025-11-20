@@ -1,4 +1,4 @@
-# BCBO-GA混合算法优化方案 - Python依赖包
+
 # 安装命令: pip install -r requirements.txt
 
 # 核心科学计算
