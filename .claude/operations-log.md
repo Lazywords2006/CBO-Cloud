@@ -1,52 +1,56 @@
-# 操作日志 - BCBO-DE 数据造假修复
+# 操作日志 - BCBO-DE 混合算法研究
 
-## 任务信息
-- **任务名称**：删除数据造假逻辑，确保学术诚信
-- **开始时间**：2025-11-19 11:20:00
-- **优先级**：最高（致命伤）
-- **目标**：修复预审稿报告中指出的数据造假问题
+## 最新更新 (2025-11-27)
 
-## 编码前检查 - 数据造假修复
-时间：2025-11-19 11:20:00
+### 🔧 问题实例共享机制修复
+**时间**：2025-11-27 15:00-15:30
+**提交**：commit 42b035c + 7563b6b
 
-### 上下文验证
-- ✅ 已查阅预审稿报告：`PRE_REVIEW_REPORT.md`
-- ✅ 已查阅上下文摘要文件：`.claude/context-summary-数据造假修复.md`
-- ✅ 已确认问题真实存在：`smooth_and_interpolate_data` 函数（第287-324行）
+#### 发现的严重Bug
+在代码审查中发现：
+- ❌ 只有BCBO和BCBO-DE使用共享问题实例
+- ❌ GA/PSO/ACO/FA/CS/GWO各自生成随机的execution_time矩阵
+- ❌ 导致算法间对比完全无效（不同问题实例）
 
-### 可复用组件
-- ✅ 将保留：`calculate_metrics_from_solution` - 用于计算性能指标
-- ✅ 将保留：`validate_generated_data` - 用于验证数据质量
-- ✅ 将删除：`smooth_and_interpolate_data` - 违反学术诚信
+#### 修复内容
+1. **添加问题实例缓存机制** (`real_algorithm_integration.py` 114-274行)
+   - 新增 `self.problem_instance` 缓存
+   - 实现 `_generate_problem_instance()` 统一生成方法
+   - M/N/seed相同时自动复用缓存
 
-### 命名约定
-- ✅ 遵循 snake_case 函数命名（如 `generate_data_for_chart_set`）
-- ✅ 遵循 PascalCase 类命名（如 `OptimizedDataGenerator`）
+2. **扩展共享机制到全部8个算法**
+   - BCBO/BCBO-DE: 覆盖所有任务/VM属性
+   - GA: 覆盖task_cpu、task_memory等核心属性
+   - PSO/ACO/FA/CS/GWO: 覆盖execution_time和核心属性
 
-### 代码风格
-- ✅ 使用UTF-8编码
-- ✅ 所有注释使用简体中文
-- ✅ 保持既有代码风格
+3. **新增验证测试**
+   - `test_all_algorithms_shared_instance.py`: 验证8个算法共享
+   - `test_shared_instance.py`: BCBO vs BCBO-DE对比
+   - `test_run.py`: 基础功能测试
 
-### 确认不重复造轮子
-- ✅ 确认删除逻辑，不新增任何功能
-- ✅ 只删除造假代码，保留真实数据生成逻辑
+#### 验证结果
+✅ 所有8个算法的execution_time shape一致
+✅ DEBUG输出确认每个算法都使用共享实例
+✅ 算法对比结果现在科学有效
 
-## 修改记录
+#### 影响
+⚠️ **需要重新生成所有chart_set数据**
+之前的数据基于不同问题实例，对比结果无效
 
-### 修改1：删除 smooth_and_interpolate_data 函数
-- **时间**：2025-11-19 11:20:00
-- **文件**：`Text Demo/generate_data_for_charts_optimized.py`
-- **位置**：第287-324行
-- **操作**：删除整个函数，替换为注释说明删除原因
-- **理由**：违反学术诚信，人为平滑和插值数据
-- **状态**：✅ 完成
+---
 
-```python
-# 修改前（第287-324行）
-def smooth_and_interpolate_data(self, data_points, window_size=5):
-    """平滑数据并插值处理重复值"""
-    # ... 38行造假代码 ...
+## 历史记录
+
+### 数据造假修复 (2025-11-19)
+**任务**：删除数据造假逻辑，确保学术诚信
+**优先级**：最高（致命伤）
+
+#### 修改记录
+1. **删除 smooth_and_interpolate_data 函数**
+   - 文件：`Text Demo/generate_data_for_charts_optimized.py`
+   - 位置：第287-324行
+   - 理由：违反学术诚信，人为平滑和插值数据
+   - 状态：✅ 完成
 
 # 修改后
 # REMOVED: smooth_and_interpolate_data 函数已删除
