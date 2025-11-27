@@ -21,11 +21,12 @@ class PerformanceMonitor:
             'avg_fitness': [],     # 平均适应度
             'diversity': [],       # 种群多样性
             'bcbo_ratio': [],      # BCBO组比例
-            'phase': []            # 当前阶段
+            'phase': [],           # 当前阶段
+            'best_solution': []    # 最优解历史
         }
 
     def record(self, iteration: int, population: List, best_fitness: float,
-               bcbo_ratio: float, phase: str, fitness_func=None):
+               bcbo_ratio: float, phase: str, fitness_func=None, best_solution=None):
         """
         记录每代的性能指标
 
@@ -36,11 +37,13 @@ class PerformanceMonitor:
             bcbo_ratio: BCBO组比例
             phase: 当前阶段
             fitness_func: 适应度函数
+            best_solution: 当前最优解 (可选)
         """
         self.history['iteration'].append(iteration)
         self.history['best_fitness'].append(best_fitness)
         self.history['bcbo_ratio'].append(bcbo_ratio)
         self.history['phase'].append(phase)
+        self.history['best_solution'].append(best_solution)
 
         # 计算平均适应度
         if fitness_func and population:

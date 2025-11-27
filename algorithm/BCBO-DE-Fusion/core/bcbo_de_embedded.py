@@ -169,7 +169,8 @@ class BCBO_DE_Embedded:
                 best_fitness=self.global_best_fitness,
                 bcbo_ratio=bcbo_ratio,
                 phase=current_phase,
-                fitness_func=self.bcbo.comprehensive_fitness
+                fitness_func=self.bcbo.comprehensive_fitness,
+                best_solution=copy.deepcopy(self.global_best_solution)
             )
 
             # 8. 打印信息
@@ -211,22 +212,14 @@ class BCBO_DE_Embedded:
             1. 全员执行标准 BCBO 更新 (保持协作机制)。
             2. 选取 Top k% (e.g. 20%) 精英。
             3. 对精英应用 DE 算子进行局部开发 (Exploitation)。
+
+        修复 (2025-11-24):
+        问题: 在融合阶段(encircle/attack)没有执行BCBO更新,导致性能下降
+        修复: 所有阶段都先执行BCBO更新,确保基础优化逻辑
         """
         # 步骤1: 全员执行 BCBO 更新
-        # 无论什么阶段，先让 BCBO 跑一遍，保证基础收敛和协作
-        if phase == 'dynamic_search':
-            # 包含 encircle_dynamic 和 attack_dynamic
-            # 注意: BCBO_CloudScheduler 的 dynamic_search_phase 内部会根据子阶段调用
-            # 但这里我们需要更细粒度的控制，或者直接调用对应的 phase 方法
-            # 为了简化，我们假设 bcbo.dynamic_search_phase 能处理好
-            # 但查看原代码，dynamic_search_phase 只是一个包装，我们需要知道具体是 encircle 还是 attack
-            # 实际上 determine_current_phase 返回的是大阶段，我们需要更细的控制
-            # 让我们直接复用 _bcbo_pure_update 的逻辑来执行 BCBO 部分
-            bcbo_updated_pop = self._bcbo_pure_update(population, phase, iteration)
-        elif phase == 'static_search':
-             bcbo_updated_pop = self._bcbo_pure_update(population, phase, iteration)
-        else:
-            bcbo_updated_pop = population
+        # 修复: 无论什么阶段,都先执行BCBO更新,确保基础优化
+        bcbo_updated_pop = self._bcbo_pure_update(population, phase, iteration)
 
         # 步骤2: 识别精英 (Top 20%)
         # 按适应度排序

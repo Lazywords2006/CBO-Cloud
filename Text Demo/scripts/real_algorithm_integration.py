@@ -111,6 +111,12 @@ class RealAlgorithmIntegrator:
         self.algorithms = {}
         self.available_algorithms = []
 
+        # ===== BUG修复 (2025-11-27): 添加问题实例缓存 =====
+        # 问题：每个算法实例独立生成execution_time矩阵，导致对比无效
+        # 修复：缓存第一个算法的问题实例，所有算法共享相同实例
+        self.problem_instance = None  # 缓存问题实例 (execution_time, task_loads, vm_caps等)
+        self.problem_instance_seed = None  # 记录问题实例对应的随机种子
+
         # 检查哪些算法可用
         if BCBO_CloudScheduler is not None:
             self.available_algorithms.append('BCBO')
@@ -169,6 +175,19 @@ class RealAlgorithmIntegrator:
         iterations = params['iterations']
         random_seed = params.get('random_seed', None)
 
+        # ===== BUG修复 (2025-11-27): 管理共享问题实例 =====
+        # 如果random_seed改变或M/N改变，需要重新生成问题实例
+        need_new_instance = (
+            self.problem_instance is None or
+            self.problem_instance_seed != random_seed or
+            self.problem_instance.get('M') != M or
+            self.problem_instance.get('N') != N
+        )
+
+        if need_new_instance:
+            print(f"[INFO] 生成新的问题实例 (M={M}, N={N}, seed={random_seed})")
+            self._generate_problem_instance(M, N, random_seed)
+
         # 设置随机种子
         if random_seed is not None:
             np.random.seed(random_seed)
@@ -200,6 +219,78 @@ class RealAlgorithmIntegrator:
             import traceback
             traceback.print_exc()
             return None
+
+    def _generate_problem_instance(self, M: int, N: int, random_seed: Optional[int]):
+        """
+        生成共享的问题实例
+
+        ===== BUG修复 (2025-11-27) =====
+        所有算法必须使用相同的execution_time矩阵，否则对比无效
+
+        参数:
+            M: 任务数量
+            N: 虚拟机数量
+            random_seed: 随机种子
+        """
+        # 设置随机种子以保证可重复性
+        if random_seed is not None:
+            np.random.seed(random_seed)
+            random.seed(random_seed)
+
+        # 生成任务和VM属性（与BCBO_CloudScheduler相同的分布）
+        task_loads = np.random.randint(50, 200, M)
+        vm_caps = np.random.randint(10, 30, N)
+
+        # 生成多维属性
+        task_cpu = task_loads.astype(float)
+        task_memory = task_loads.astype(float) * 0.5
+        task_storage = np.random.uniform(5, 50, M)
+        task_network = np.random.uniform(2, 20, M)
+        task_priority = np.random.randint(1, 4, M)
+        task_deadline = np.random.uniform(10, 50, M)
+        task_data_size = np.random.uniform(1, 30, M)
+
+        vm_cpu_capacity = vm_caps.astype(float)
+        vm_memory_capacity = vm_caps.astype(float) * 2.0
+        vm_storage_capacity = np.random.uniform(500, 3000, N)
+        vm_network_capacity = np.random.uniform(50, 300, N)
+        vm_processing_speed = np.random.uniform(1.2, 3.5, N)
+        vm_cost = np.random.uniform(0.05, 0.15, N)
+        vm_energy_efficiency = np.random.uniform(0.6, 0.9, N)
+
+        # 计算执行时间矩阵
+        execution_time = np.zeros((M, N))
+        for i in range(M):
+            for j in range(N):
+                workload = (task_cpu[i] + task_memory[i] +
+                           task_storage[i] + task_network[i])
+                execution_time[i][j] = workload / vm_processing_speed[j]
+
+        # 保存问题实例
+        self.problem_instance = {
+            'M': M,
+            'N': N,
+            'task_loads': task_loads,
+            'vm_caps': vm_caps,
+            'task_cpu': task_cpu,
+            'task_memory': task_memory,
+            'task_storage': task_storage,
+            'task_network': task_network,
+            'task_priority': task_priority,
+            'task_deadline': task_deadline,
+            'task_data_size': task_data_size,
+            'vm_cpu_capacity': vm_cpu_capacity,
+            'vm_memory_capacity': vm_memory_capacity,
+            'vm_storage_capacity': vm_storage_capacity,
+            'vm_network_capacity': vm_network_capacity,
+            'vm_processing_speed': vm_processing_speed,
+            'vm_cost': vm_cost,
+            'vm_energy_efficiency': vm_energy_efficiency,
+            'execution_time': execution_time
+        }
+        self.problem_instance_seed = random_seed
+
+        print(f"[DEBUG] 问题实例已生成: execution_time shape={execution_time.shape}")
 
     def _process_convergence_history(self, history):
         """
@@ -273,7 +364,30 @@ class RealAlgorithmIntegrator:
         if BCBO_CloudScheduler is None:
             raise RuntimeError("BCBO算法不可用")
 
+        # ===== BUG修复 (2025-11-27): 使用共享问题实例 =====
         algo = BCBO_CloudScheduler(M, N, n, iterations, random_seed)
+
+        # 强制使用缓存的问题实例
+        if self.problem_instance is not None:
+            algo.task_loads = self.problem_instance['task_loads']
+            algo.vm_caps = self.problem_instance['vm_caps']
+            algo.task_cpu = self.problem_instance['task_cpu']
+            algo.task_memory = self.problem_instance['task_memory']
+            algo.task_storage = self.problem_instance['task_storage']
+            algo.task_network = self.problem_instance['task_network']
+            algo.task_priority = self.problem_instance['task_priority']
+            algo.task_deadline = self.problem_instance['task_deadline']
+            algo.task_data_size = self.problem_instance['task_data_size']
+            algo.vm_cpu_capacity = self.problem_instance['vm_cpu_capacity']
+            algo.vm_memory_capacity = self.problem_instance['vm_memory_capacity']
+            algo.vm_storage_capacity = self.problem_instance['vm_storage_capacity']
+            algo.vm_network_capacity = self.problem_instance['vm_network_capacity']
+            algo.vm_processing_speed = self.problem_instance['vm_processing_speed']
+            algo.vm_cost = self.problem_instance['vm_cost']
+            algo.vm_energy_efficiency = self.problem_instance['vm_energy_efficiency']
+            algo.execution_time = self.problem_instance['execution_time']
+            print(f"[DEBUG] BCBO使用共享问题实例: execution_time shape={algo.execution_time.shape}")
+
         result = algo.run_complete_algorithm()
 
         self.algorithms['BCBO'] = algo
@@ -286,6 +400,18 @@ class RealAlgorithmIntegrator:
             raise RuntimeError("GA算法不可用")
 
         algo = GeneticAlgorithmScheduler(M, N, population_size=n, generations=iterations)
+
+        # ===== BUG修复 (2025-11-27): 使用共享问题实例 =====
+        if self.problem_instance is not None:
+            # GA没有完整的任务/VM属性，只需要覆盖核心计算属性
+            algo.task_cpu = self.problem_instance['task_cpu']
+            algo.task_memory = self.problem_instance['task_memory']
+            algo.vm_cpu_capacity = self.problem_instance['vm_cpu_capacity']
+            algo.vm_memory_capacity = self.problem_instance['vm_memory_capacity']
+            algo.vm_processing_speed = self.problem_instance['vm_processing_speed']
+            algo.vm_cost = self.problem_instance['vm_cost']
+            print(f"[DEBUG] GA使用共享问题实例")
+
         result = algo.optimize()
 
         self.algorithms['GA'] = algo
@@ -298,6 +424,16 @@ class RealAlgorithmIntegrator:
             raise RuntimeError("PSO算法不可用")
 
         algo = ParticleSwarmOptimizer(M, N, num_particles=n, max_iterations=iterations)
+
+        # ===== BUG修复 (2025-11-27): 使用共享问题实例 =====
+        if self.problem_instance is not None:
+            algo.execution_time = self.problem_instance['execution_time']
+            algo.task_cpu = self.problem_instance['task_cpu']
+            algo.task_memory = self.problem_instance['task_memory']
+            algo.vm_processing_speed = self.problem_instance['vm_processing_speed']
+            algo.vm_cost = self.problem_instance['vm_cost']
+            print(f"[DEBUG] PSO使用共享问题实例: execution_time shape={algo.execution_time.shape}")
+
         result = algo.optimize()
 
         self.algorithms['PSO'] = algo
@@ -310,6 +446,16 @@ class RealAlgorithmIntegrator:
             raise RuntimeError("ACO算法不可用")
 
         algo = AntColonyOptimizer(M, N, num_ants=n, max_iterations=iterations)
+
+        # ===== BUG修复 (2025-11-27): 使用共享问题实例 =====
+        if self.problem_instance is not None:
+            algo.execution_time = self.problem_instance['execution_time']
+            algo.task_cpu = self.problem_instance['task_cpu']
+            algo.task_memory = self.problem_instance['task_memory']
+            algo.vm_processing_speed = self.problem_instance['vm_processing_speed']
+            algo.vm_cost = self.problem_instance['vm_cost']
+            print(f"[DEBUG] ACO使用共享问题实例: execution_time shape={algo.execution_time.shape}")
+
         result = algo.optimize()
 
         self.algorithms['ACO'] = algo
@@ -322,6 +468,18 @@ class RealAlgorithmIntegrator:
             raise RuntimeError("FA算法不可用")
 
         algo = FireflyAlgorithm(M, N, num_fireflies=n, max_iterations=iterations)
+
+        # ===== BUG修复 (2025-11-27): 使用共享问题实例 =====
+        if self.problem_instance is not None:
+            algo.execution_time = self.problem_instance['execution_time']
+            algo.task_cpu = self.problem_instance['task_cpu']
+            algo.task_memory = self.problem_instance['task_memory']
+            algo.task_storage = self.problem_instance['task_storage']
+            algo.task_network = self.problem_instance['task_network']
+            algo.vm_processing_speed = self.problem_instance['vm_processing_speed']
+            algo.vm_cost = self.problem_instance['vm_cost']
+            print(f"[DEBUG] FA使用共享问题实例: execution_time shape={algo.execution_time.shape}")
+
         result = algo.optimize()
 
         self.algorithms['FA'] = algo
@@ -334,6 +492,18 @@ class RealAlgorithmIntegrator:
             raise RuntimeError("CS算法不可用")
 
         algo = CuckooSearch(M, N, num_nests=n, max_iterations=iterations)
+
+        # ===== BUG修复 (2025-11-27): 使用共享问题实例 =====
+        if self.problem_instance is not None:
+            algo.execution_time = self.problem_instance['execution_time']
+            algo.task_cpu = self.problem_instance['task_cpu']
+            algo.task_memory = self.problem_instance['task_memory']
+            algo.task_storage = self.problem_instance['task_storage']
+            algo.task_network = self.problem_instance['task_network']
+            algo.vm_processing_speed = self.problem_instance['vm_processing_speed']
+            algo.vm_cost = self.problem_instance['vm_cost']
+            print(f"[DEBUG] CS使用共享问题实例: execution_time shape={algo.execution_time.shape}")
+
         result = algo.optimize()
 
         self.algorithms['CS'] = algo
@@ -346,6 +516,19 @@ class RealAlgorithmIntegrator:
             raise RuntimeError("GWO算法不可用")
 
         algo = GreyWolfOptimizer(M, N, num_wolves=n, max_iterations=iterations)
+
+        # ===== BUG修复 (2025-11-27): 使用共享问题实例 =====
+        if self.problem_instance is not None:
+            algo.execution_time = self.problem_instance['execution_time']
+            algo.task_cpu = self.problem_instance['task_cpu']
+            algo.task_memory = self.problem_instance['task_memory']
+            algo.task_storage = self.problem_instance['task_storage']
+            algo.task_network = self.problem_instance['task_network']
+            algo.task_data_size = self.problem_instance['task_data_size']
+            algo.vm_processing_speed = self.problem_instance['vm_processing_speed']
+            algo.vm_cost = self.problem_instance['vm_cost']
+            print(f"[DEBUG] GWO使用共享问题实例: execution_time shape={algo.execution_time.shape}")
+
         result = algo.optimize()
 
         self.algorithms['GWO'] = algo
@@ -357,11 +540,35 @@ class RealAlgorithmIntegrator:
         if BCBO_DE_Embedded is None:
             raise RuntimeError("BCBO-DE算法不可用")
 
+        # ===== BUG修复 (2025-11-27): 使用共享问题实例 =====
         algo = BCBO_DE_Embedded(
             M=M, N=N, n=n, iterations=iterations,
             random_seed=random_seed if random_seed is not None else 42,
             verbose=False  # 关闭详细输出以加快速度
         )
+
+        # 强制使用缓存的问题实例（通过内部的bcbo实例）
+        if self.problem_instance is not None:
+            bcbo_instance = algo.bcbo
+            bcbo_instance.task_loads = self.problem_instance['task_loads']
+            bcbo_instance.vm_caps = self.problem_instance['vm_caps']
+            bcbo_instance.task_cpu = self.problem_instance['task_cpu']
+            bcbo_instance.task_memory = self.problem_instance['task_memory']
+            bcbo_instance.task_storage = self.problem_instance['task_storage']
+            bcbo_instance.task_network = self.problem_instance['task_network']
+            bcbo_instance.task_priority = self.problem_instance['task_priority']
+            bcbo_instance.task_deadline = self.problem_instance['task_deadline']
+            bcbo_instance.task_data_size = self.problem_instance['task_data_size']
+            bcbo_instance.vm_cpu_capacity = self.problem_instance['vm_cpu_capacity']
+            bcbo_instance.vm_memory_capacity = self.problem_instance['vm_memory_capacity']
+            bcbo_instance.vm_storage_capacity = self.problem_instance['vm_storage_capacity']
+            bcbo_instance.vm_network_capacity = self.problem_instance['vm_network_capacity']
+            bcbo_instance.vm_processing_speed = self.problem_instance['vm_processing_speed']
+            bcbo_instance.vm_cost = self.problem_instance['vm_cost']
+            bcbo_instance.vm_energy_efficiency = self.problem_instance['vm_energy_efficiency']
+            bcbo_instance.execution_time = self.problem_instance['execution_time']
+            print(f"[DEBUG] BCBO-DE使用共享问题实例: execution_time shape={bcbo_instance.execution_time.shape}")
+
         result = algo.run_fusion_optimization()
 
         self.algorithms['BCBO-DE'] = algo
@@ -423,11 +630,18 @@ class RealAlgorithmIntegrator:
                 # 将字典格式转换为列表格式
                 iterations = monitor_history.get('iteration', [])
                 best_fitness_list = monitor_history.get('best_fitness', [])
+                best_solution_list = monitor_history.get('best_solution', [])
+
                 for i in range(len(iterations)):
+                    # 获取当前迭代的最优解（如果有记录）
+                    current_best_solution = best_solution
+                    if i < len(best_solution_list) and best_solution_list[i] is not None:
+                        current_best_solution = best_solution_list[i]
+
                     convergence_history.append({
                         'iteration': iterations[i] + 1,
                         'best_fitness': best_fitness_list[i] if i < len(best_fitness_list) else 0,
-                        'best_solution': best_solution,  # 使用全局最优解
+                        'best_solution': current_best_solution,  # 使用历史记录中的最优解
                         'global_best_fitness': best_fitness_list[i] if i < len(best_fitness_list) else 0
                     })
             else:

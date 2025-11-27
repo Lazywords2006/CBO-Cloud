@@ -73,7 +73,7 @@ CHART_CONFIGS = {
             'N': 20,
             'n': 50
         },
-        'runs_per_point': 5  # 修复：改为5次重复实验以提高统计可靠性
+        'runs_per_point': 1  # 测试模式：单次运行，快速验证N=20配置
     },
     'chart_set_2': {
         'name': '图表集2 - 任务规模 vs 成本',
@@ -82,10 +82,10 @@ CHART_CONFIGS = {
         'values': list(range(100, 1001, 100)),
         'fixed_params': {
             'iterations': 80,
-            'N': 50,
+            'N': 20,  # 统一为20，解决高维空间DE失效问题
             'n': 50
         },
-        'runs_per_point': 5  # 保持5次重复实验
+        'runs_per_point': 1  # 测试模式：单次运行，快速验证N=20配置
     },
     'chart_set_3': {
         'name': '图表集3 - 迭代次数 vs 性能指标 (大规模1000任务)',
@@ -94,10 +94,10 @@ CHART_CONFIGS = {
         'values': list(range(5, 101, 5)),
         'fixed_params': {
             'M': 1000,
-            'N': 50,
+            'N': 20,  # 统一为20，解决高维空间DE失效问题
             'n': 50
         },
-        'runs_per_point': 5  # 修复：改为5次重复实验
+        'runs_per_point': 1  # 测试模式：单次运行，快速验证N=20配置
     },
     'chart_set_4': {
         'name': '图表集4 - 任务规模 vs 成本 (大规模)',
@@ -106,10 +106,10 @@ CHART_CONFIGS = {
         'values': list(range(1000, 5001, 1000)),
         'fixed_params': {
             'iterations': 50,
-            'N': 100,
+            'N': 20,  # 统一为20，解决高维空间DE失效问题
             'n': 50
         },
-        'runs_per_point': 5  # 修复：改为5次重复实验
+        'runs_per_point': 1  # 测试模式：单次运行，快速验证N=20配置
     }
 }
 

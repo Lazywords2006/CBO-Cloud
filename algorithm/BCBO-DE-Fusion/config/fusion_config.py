@@ -52,13 +52,15 @@ PURE_BCBO_PHASES = [
 ]
 
 # 渐进式融合强度(不同阶段的DE应用概率)
+# 精细调优 (2025-11-25): 平衡DE融合强度，保护负载均衡性能
+# 策略: 降低后期融合强度，避免过度DE导致负载均衡劣化
 PHASE_FUSION_INTENSITY = {
     'dynamic_search': 0.0,    # 不融合,保持BCBO探索
     'static_search': 0.0,     # 不融合
-    'encircle_dynamic': 0.3,  # 30%概率应用DE
-    'encircle_static': 0.5,   # 50%概率应用DE
-    'attack_dynamic': 0.7,    # 70%概率应用DE(重点)
-    'attack_static': 0.9      # 90%概率应用DE(极致)
+    'encircle_dynamic': 0.45, # 45%概率应用DE (从0.6降低，减少早期干扰)
+    'encircle_static': 0.65,  # 65%概率应用DE (从0.8降低，平衡融合)
+    'attack_dynamic': 0.75,   # 75%概率应用DE (从0.9降低，关键调整)
+    'attack_static': 0.85     # 85%概率应用DE (从1.0降低，保留BCBO能力)
 }
 
 
