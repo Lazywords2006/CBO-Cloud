@@ -230,7 +230,7 @@ def main():
             'variable_param': 'iterations',
             'values': list(range(5, 101, 5)),
             'fixed_params': {'M': 100, 'N': 20, 'n': 50},
-            'runs_per_point': 1
+            'runs_per_point': 30
         },
         'chart_set_2': {
             'name': '图表集2 - 任务规模 vs 成本',
@@ -238,7 +238,7 @@ def main():
             'variable_param': 'M',
             'values': list(range(100, 1001, 100)),
             'fixed_params': {'iterations': 80, 'N': 50, 'n': 50},
-            'runs_per_point': 5
+            'runs_per_point': 30
         },
         'chart_set_3': {
             'name': '图表集3 - 迭代次数 vs 性能指标 (大规模1000任务)',
@@ -246,7 +246,7 @@ def main():
             'variable_param': 'iterations',
             'values': list(range(5, 101, 5)),
             'fixed_params': {'M': 1000, 'N': 50, 'n': 50},
-            'runs_per_point': 1
+            'runs_per_point': 30
         },
         'chart_set_4': {
             'name': '图表集4 - 大规模 vs 成本 (超大规模)',
@@ -254,7 +254,7 @@ def main():
             'variable_param': 'M',
             'values': [1000, 2000, 3000, 4000, 5000],
             'fixed_params': {'iterations': 150, 'N': 100, 'n': 80},
-            'runs_per_point': 5
+            'runs_per_point': 30
         }
     }
 

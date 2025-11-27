@@ -1,378 +1,367 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-多算法对比 - 论文级图表生成
+论文级图表生成工具 - 简化版
 =========================================
-基于数据生成工具的RAW_data，生成高质量的多算法对比图表
-支持: BCBO, GA, PSO, ACO, FA, CS, GWO, BCBO-GA-Hybrid
+只生成两种核心图表:
+1. BCBO vs BCBO-DE 对比图
+2. 所有算法对比图
 """
 
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-import matplotlib.patches as mpatches
 from matplotlib.gridspec import GridSpec
 import json
 import os
 from datetime import datetime
 import glob
+import re
+import sys
+
+# 设置标准输出编码为 UTF-8，避免 Windows 下的编码问题
+if sys.platform == 'win32':
+    import io
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 
 # 获取脚本所在目录的绝对路径
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 DEFAULT_RAW_DATA_DIR = os.path.join(SCRIPT_DIR, 'RAW_data')
 DEFAULT_OUTPUT_DIR = os.path.join(SCRIPT_DIR, 'publication_charts')
 
-# 设置中文字体和样式
-plt.style.use('seaborn-v0_8-darkgrid')
-plt.rcParams['font.sans-serif'] = ['SimHei', 'Microsoft YaHei', 'Arial Unicode MS']
+# 设置期刊出版级样式
+# 使用标准学术字体：Times New Roman (衬线) + Arial (无衬线)
+plt.rcParams['font.family'] = 'serif'
+plt.rcParams['font.serif'] = ['Times New Roman', 'DejaVu Serif', 'SimSun']
+plt.rcParams['font.sans-serif'] = ['Arial', 'DejaVu Sans', 'SimHei']
+plt.rcParams['mathtext.fontset'] = 'stix'  # 数学公式使用STIX字体
 plt.rcParams['axes.unicode_minus'] = False
-plt.rcParams['figure.dpi'] = 150
-plt.rcParams['savefig.dpi'] = 300
 
-# 算法配置
+# 高分辨率设置 - 期刊要求至少300 DPI
+plt.rcParams['figure.dpi'] = 100  # 屏幕显示
+plt.rcParams['savefig.dpi'] = 600  # 保存为600 DPI，超过期刊要求
+
+# 线条和标记设置 - 清晰可见
+plt.rcParams['lines.linewidth'] = 1.5
+plt.rcParams['lines.markersize'] = 6
+
+# 图表网格和边框
+plt.rcParams['axes.linewidth'] = 0.8
+plt.rcParams['grid.linewidth'] = 0.5
+plt.rcParams['grid.alpha'] = 0.3
+
+# 字体大小 - 适合期刊出版
+plt.rcParams['font.size'] = 10
+plt.rcParams['axes.labelsize'] = 11
+plt.rcParams['axes.titlesize'] = 12
+plt.rcParams['xtick.labelsize'] = 9
+plt.rcParams['ytick.labelsize'] = 9
+plt.rcParams['legend.fontsize'] = 9
+
+# 图例设置
+plt.rcParams['legend.framealpha'] = 0.9
+plt.rcParams['legend.edgecolor'] = '0.8'
+
+# PDF输出设置
+plt.rcParams['pdf.fonttype'] = 42  # TrueType字体，便于编辑
+plt.rcParams['ps.fonttype'] = 42
+
+# SVG输出设置
+plt.rcParams['svg.fonttype'] = 'none'  # 保持文本可编辑
+
+# 算法配置 - 期刊出版级颜色方案
+# 使用ColorBrewer的高对比度配色，在灰度打印时仍可区分
+# 同时使用不同的线型和标记确保黑白打印时的可区分性
 ALGORITHM_CONFIG = {
-    'BCBO': {'color': '#1f77b4', 'label': 'BCBO', 'linestyle': '-', 'marker': 'o'},
-    'GA': {'color': '#ff7f0e', 'label': 'GA', 'linestyle': '--', 'marker': 's'},
-    'PSO': {'color': '#2ca02c', 'label': 'PSO', 'linestyle': '-.', 'marker': '^'},
-    'ACO': {'color': '#d62728', 'label': 'ACO', 'linestyle': ':', 'marker': 'D'},
-    'FA': {'color': '#9467bd', 'label': 'FA', 'linestyle': '-', 'marker': 'v'},
-    'CS': {'color': '#8c564b', 'label': 'CS', 'linestyle': '--', 'marker': 'p'},
-    'GWO': {'color': '#e377c2', 'label': 'GWO', 'linestyle': '-.', 'marker': '*'},
-    'BCBO-DE': {'color': '#17becf', 'label': 'BCBO-DE', 'linestyle': '-', 'marker': 'H'},
+    'BCBO': {
+        'color': '#377eb8',      # 深蓝色 - 基准算法
+        'label': 'BCBO', 
+        'linestyle': '-', 
+        'marker': 'o',
+        'markersize': 7
+    },
+    'BCBO-DE': {
+        'color': '#e41a1c',      # 鲜红色 - 提出的算法（强调）
+        'label': 'BCBO-DE', 
+        'linestyle': '-', 
+        'marker': 's',
+        'markersize': 8,
+        'linewidth': 2.5          # 加粗以强调
+    },
+    'GA': {
+        'color': '#4daf4a',      # 绿色
+        'label': 'GA', 
+        'linestyle': '--', 
+        'marker': '^',
+        'markersize': 7
+    },
+    'PSO': {
+        'color': '#984ea3',      # 紫色
+        'label': 'PSO', 
+        'linestyle': '-.', 
+        'marker': 'v',
+        'markersize': 7
+    },
+    'ACO': {
+        'color': '#ff7f00',      # 橙色
+        'label': 'ACO', 
+        'linestyle': ':', 
+        'marker': 'D',
+        'markersize': 6
+    },
+    'FA': {
+        'color': '#a65628',      # 棕色
+        'label': 'FA', 
+        'linestyle': '--', 
+        'marker': 'p',
+        'markersize': 7
+    },
+    'CS': {
+        'color': '#f781bf',      # 粉色
+        'label': 'CS', 
+        'linestyle': '-.', 
+        'marker': 'h',
+        'markersize': 7
+    },
+    'GWO': {
+        'color': '#999999',      # 灰色
+        'label': 'GWO', 
+        'linestyle': ':', 
+        'marker': '*',
+        'markersize': 8
+    },
+}
+
+# 图表集标题配置
+CHART_SET_TITLES = {
+    'chart_set_1': 'Iteration Performance Comparison (100 tasks, 20 VMs)',
+    'chart_set_2': 'Task Scale Cost Comparison (100-1000 tasks)',
+    'chart_set_3': 'Iteration Performance Comparison (1000 tasks, 50 VMs)',
+    'chart_set_4': 'Large Scale Cost Comparison (1000-5000 tasks)'
 }
 
 
-class MultiAlgorithmChartGenerator:
-    """多算法对比图表生成器"""
-
-    def __init__(self, raw_data_dir, chart_set='chart_set_1', output_dir='publication_charts',
-                 max_points=20):
-        """
-        初始化
-
-        参数:
-            raw_data_dir: RAW_data目录路径
-            chart_set: 图表集名称 (chart_set_1, chart_set_2, chart_set_3, chart_set_4)
-            output_dir: 输出目录
-            max_points: 每条曲线的最大显示点数（默认20，让曲线更清晰）
-        """
+class ChartGenerator:
+    """图表生成器"""
+    
+    def __init__(self, raw_data_dir, chart_set, output_dir, max_points=20):
         self.raw_data_dir = raw_data_dir
         self.chart_set = chart_set
         self.output_dir = output_dir
         self.max_points = max_points
         os.makedirs(output_dir, exist_ok=True)
-
-        # 加载所有算法数据
+        
+        # 加载数据
         self.algorithm_data = {}
-        self._load_all_algorithms()
-
-        print(f"数据加载完成 ({chart_set}):")
-        for algo, data in self.algorithm_data.items():
-            print(f"  {algo}: {len(data)} 数据点")
-
-    def _load_all_algorithms(self):
-        """加载所有算法的数据"""
-        # 优先尝试加载合并文件
+        self._load_data()
+        
+    def _load_data(self):
+        """加载算法数据"""
         merged_file = os.path.join(self.raw_data_dir, f'{self.chart_set}_merged_results.json')
-
-        if os.path.exists(merged_file):
-            print(f"找到合并文件: {merged_file}")
-            try:
-                with open(merged_file, 'r', encoding='utf-8') as f:
-                    merged_data = json.load(f)
-                    algorithms_data = merged_data.get('algorithms', {})
-
-                    for algo_name, algo_info in algorithms_data.items():
-                        results = algo_info.get('results', [])
-                        if results:
-                            self.algorithm_data[algo_name] = results
-                            print(f"  从合并文件加载: {algo_name} ({len(results)} 数据点)")
-
-                    if self.algorithm_data:
-                        print(f"成功从合并文件加载 {len(self.algorithm_data)} 个算法")
-                        return
-            except Exception as e:
-                print(f"警告: 无法加载合并文件: {e}")
-
-        # 如果合并文件不存在或加载失败，尝试加载单独文件
-        print(f"尝试加载单独的算法文件...")
-        pattern = os.path.join(self.raw_data_dir, f'{self.chart_set}_*_results.json')
-        json_files = glob.glob(pattern)
-
-        # 排除合并文件
-        json_files = [f for f in json_files if 'merged' not in os.path.basename(f)]
-
-        for json_file in json_files:
-            try:
-                with open(json_file, 'r', encoding='utf-8') as f:
-                    data = json.load(f)
-                    algorithm = data['algorithm']
-                    results = data['results']
-                    self.algorithm_data[algorithm] = results
-                    print(f"  加载: {algorithm} ({len(results)} 数据点)")
-            except Exception as e:
-                print(f"警告: 无法加载 {json_file}: {e}")
-
-        # 检查是否成功加载至少一个算法
-        if not self.algorithm_data:
-            error_msg = (
-                f"\n{'='*80}\n"
-                f"[错误] 在 {self.raw_data_dir} 中找不到任何算法数据文件\n"
-                f"{'='*80}\n"
-                f"可能的原因:\n"
-                f"1. RAW_data 目录为空 - 请先运行数据生成脚本\n"
-                f"2. 文件名格式不匹配 - 期望格式: {self.chart_set}_*.json\n"
-                f"3. 路径错误 - 请检查数据目录路径是否正确\n"
-                f"\n建议操作:\n"
-                f"  cd 'Text Demo'\n"
-                f"  python generate_data_for_charts_optimized.py --chart-set 1\n"
-                f"{'='*80}\n"
-            )
-            raise RuntimeError(error_msg)
-
-    def _downsample_data(self, data, max_points=None):
-        """
-        对数据进行下采样，减少显示的点数
-
-        策略：
-        - 总是保留第一个和最后一个点
-        - 在中间均匀采样
-        - 确保关键转折点被保留
-
-        参数:
-            data: 原始数据点列表
-            max_points: 最大点数，如果为None则使用self.max_points
-
-        返回:
-            下采样后的数据点列表
-        """
-        if max_points is None:
-            max_points = self.max_points
-
-        if len(data) <= max_points:
+        
+        if not os.path.exists(merged_file):
+            raise FileNotFoundError(f"找不到数据文件: {merged_file}")
+        
+        with open(merged_file, 'r', encoding='utf-8') as f:
+            merged_data = json.load(f)
+            algorithms_data = merged_data.get('algorithms', {})
+            
+            for algo_name, algo_info in algorithms_data.items():
+                results = algo_info.get('results', [])
+                if results:
+                    self.algorithm_data[algo_name] = results
+        
+        print(f"✓ 加载 {self.chart_set}: {len(self.algorithm_data)} 个算法")
+    
+    def _downsample_data(self, data):
+        """下采样数据"""
+        if len(data) <= self.max_points:
             return data
+        indices = np.linspace(0, len(data) - 1, self.max_points, dtype=int)
+        return [data[i] for i in indices]
+    
+    def _plot_metric(self, ax, selected_algorithms, metric_key, ylabel, title):
+        """绘制单个指标 - 期刊出版级质量"""
+        xlabel = 'Iteration'
+        
+        for algo in selected_algorithms:
+            if algo not in self.algorithm_data:
+                continue
+            
+            data = self.algorithm_data[algo]
+            config = ALGORITHM_CONFIG.get(algo, {})
+            sampled_data = self._downsample_data(data)
+            
+            # 提取x轴和y轴数据
+            if 'iteration' in sampled_data[0]:
+                x = [point['iteration'] for point in sampled_data]
+                xlabel = 'Iteration'
+            else:
+                x = [point.get('M', point.get('task_count', i)) for i, point in enumerate(sampled_data)]
+                xlabel = 'Number of Tasks'
+            
+            y = [point[metric_key] for point in sampled_data]
+            
+            # 绘制曲线 - 使用配置中的所有参数
+            ax.plot(x, y,
+                   color=config.get('color', '#000000'),
+                   linestyle=config.get('linestyle', '-'),
+                   marker=config.get('marker', 'o'),
+                   linewidth=config.get('linewidth', 1.5),
+                   markersize=config.get('markersize', 6),
+                   label=config.get('label', algo),
+                   markerfacecolor=config.get('color', '#000000'),
+                   markeredgewidth=0.5,
+                   markeredgecolor='white',
+                   alpha=0.9,
+                   zorder=3)  # 确保线条在网格之上
+        
+        # 设置轴标签 - 使用标准学术格式
+        ax.set_xlabel(xlabel, fontsize=11, fontweight='normal')
+        ax.set_ylabel(ylabel, fontsize=11, fontweight='normal')
+        ax.set_title(title, fontsize=12, fontweight='bold', pad=10)
+        
+        # 图例设置 - 紧凑且专业，缩短标记线
+        # 使用半透明背景，避免完全遮挡数据线
+        legend = ax.legend(
+            fontsize=9,
+            loc='best',
+            framealpha=0.7,          # 降低不透明度至70%，使背景数据线可见
+            edgecolor='0.8',
+            fancybox=False,
+            shadow=False,
+            ncol=1 if len(selected_algorithms) <= 4 else 2,
+            handlelength=1.5,        # 缩短图例中的线条长度
+            handleheight=0.7,        # 减小图例标记高度
+            columnspacing=1.0,       # 列间距
+            labelspacing=0.5,        # 行间距
+            facecolor='white'        # 明确设置白色背景
+        )
+        # 设置图例框的圆角和边框样式，使其更加轻量化
+        legend.get_frame().set_linewidth(0.5)  # 更细的边框
+        legend.get_frame().set_boxstyle('round,pad=0.3')  # 圆角边框，减小内边距
+        
+        # 网格设置 - 细微辅助线
+        ax.grid(True, alpha=0.3, linestyle=':', linewidth=0.5)
+        ax.set_axisbelow(True)  # 网格在数据下方
+        
+        # 边框设置
+        for spine in ax.spines.values():
+            spine.set_linewidth(0.8)
+            spine.set_color('0.5')
+    
+    def generate_comprehensive_comparison(self, selected_algorithms, output_suffix):
+        """生成综合对比图（4子图）- 期刊出版级质量"""
 
-        # 使用numpy进行均匀采样
-        indices = np.linspace(0, len(data) - 1, max_points, dtype=int)
-        sampled_data = [data[i] for i in indices]
+        # 期刊标准尺寸：增大尺寸以确保完整显示
+        # IEEE标准：单栏 3.5", 双栏 7.16"
+        fig_width = 10.0  # 英寸，增大宽度
+        fig_height = 8.5  # 英寸，增大高度以容纳标题和图例
 
-        return sampled_data
-
-    def generate_comprehensive_comparison(self, selected_algorithms=None):
-        """
-        生成综合对比图（4子图）
-
-        参数:
-            selected_algorithms: 选择要对比的算法列表，None表示使用所有可用算法
-        """
-        if selected_algorithms is None:
-            selected_algorithms = list(self.algorithm_data.keys())
-
-        fig = plt.figure(figsize=(16, 10))
-        gs = GridSpec(2, 2, figure=fig, hspace=0.3, wspace=0.3)
-
-        # 标题
-        chart_set_titles = {
-            'chart_set_1': 'Iteration Performance Comparison (100 tasks, 20 VMs)',
-            'chart_set_2': 'Task Scale Cost Comparison (100-1000 tasks)',
-            'chart_set_3': 'Iteration Performance Comparison (1000 tasks, 50 VMs)',
-            'chart_set_4': 'Large Scale Cost Comparison (1000-5000 tasks)'
-        }
-        title = chart_set_titles.get(self.chart_set, 'Multi-Algorithm Performance Comparison')
-        fig.suptitle(title, fontsize=18, fontweight='bold', y=0.98)
-
-        # 1. Execution Time对比（左上）
+        fig = plt.figure(figsize=(fig_width, fig_height))
+        # 调整布局：增加所有边距，确保标题、标签和图例完全可见
+        # 增大子图间距，避免重叠
+        gs = GridSpec(2, 2, figure=fig, hspace=0.45, wspace=0.40,
+                     left=0.10, right=0.95, top=0.90, bottom=0.10)
+        
+        # 主标题 - 使用标准学术格式，调整位置确保不重叠
+        title = CHART_SET_TITLES.get(self.chart_set, 'Multi-Algorithm Performance Comparison')
+        fig.suptitle(title, fontsize=14, fontweight='bold', y=0.96)
+        
+        # 四个子图
         ax1 = fig.add_subplot(gs[0, 0])
-        self._plot_execution_time_comparison(ax1, selected_algorithms)
-
-        # 2. Total Cost对比（右上）
+        self._plot_metric(ax1, selected_algorithms, 'execution_time',
+                         'Execution Time (s)', '(a) Execution Time')
+        
         ax2 = fig.add_subplot(gs[0, 1])
-        self._plot_cost_comparison(ax2, selected_algorithms)
-
-        # 3. Load Balance对比（左下）
+        self._plot_metric(ax2, selected_algorithms, 'total_cost',
+                         'Total Cost ($)', '(b) Total Cost')
+        
         ax3 = fig.add_subplot(gs[1, 0])
-        self._plot_load_balance_comparison(ax3, selected_algorithms)
-
-        # 4. Price Efficiency对比（右下）
+        self._plot_metric(ax3, selected_algorithms, 'load_balance',
+                         'Load Balance Index', '(c) Load Balance')
+        
         ax4 = fig.add_subplot(gs[1, 1])
-        self._plot_price_efficiency_comparison(ax4, selected_algorithms)
+        self._plot_metric(ax4, selected_algorithms, 'price_efficiency',
+                         'Price Efficiency Index', '(d) Price Efficiency')
+        
+        # 保存为多种格式 - 期刊投稿需要
+        # 为每个图表集创建独立子目录
+        chart_set_dir = os.path.join(self.output_dir, self.chart_set)
+        os.makedirs(chart_set_dir, exist_ok=True)
+        base_path = os.path.join(chart_set_dir, output_suffix)
+        
+        # 1. PNG格式 - 高分辨率，用于预览和论文初稿
+        png_path = f'{base_path}.png'
+        plt.savefig(png_path, format='png', dpi=600, bbox_inches='tight',
+                   facecolor='white', edgecolor='none', 
+                   pil_kwargs={'optimize': True})
+        print(f"  ✓ 保存PNG: {output_suffix}.png (600 DPI)")
+        
+        # 2. PDF格式 - 矢量图，最常用于论文发表
+        pdf_path = f'{base_path}.pdf'
+        plt.savefig(pdf_path, format='pdf', bbox_inches='tight',
+                   facecolor='white', edgecolor='none',
+                   metadata={'Creator': 'Publication Chart Generator',
+                            'Author': 'Research Team'})
+        print(f"  ✓ 保存PDF: {output_suffix}.pdf (矢量)")
+        
+        # 4. EPS格式 - 部分期刊要求的格式
+        eps_path = f'{base_path}.eps'
+        try:
+            plt.savefig(eps_path, format='eps', bbox_inches='tight',
+                       facecolor='white', edgecolor='none')
+            print(f"  ✓ 保存EPS: {output_suffix}.eps (期刊格式)")
+        except Exception as e:
+            print(f"  ⚠ EPS保存失败 (可选格式): {e}")
+        
+        # 关闭当前图表
+        plt.close(fig)
+        
+        # 3. SVG格式 - 使用更大尺寸以便于查看和编辑
+        # 为SVG单独生成更大的图表（1.5倍尺寸，而非2倍，避免过大）
+        svg_width = fig_width * 1.5  # 15英寸
+        svg_height = fig_height * 1.5  # 12.75英寸
 
-        # 保存
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        algo_suffix = '_'.join(selected_algorithms[:3]) if len(selected_algorithms) <= 3 else 'multi_algo'
-        filepath = os.path.join(self.output_dir,
-                                f'{self.chart_set}_comprehensive_{algo_suffix}_{timestamp}.png')
-        plt.savefig(filepath, bbox_inches='tight', dpi=300)
-        print(f"综合对比图已保存: {filepath}")
+        fig_svg = plt.figure(figsize=(svg_width, svg_height))
+        # SVG使用相同的优化布局比例
+        gs_svg = GridSpec(2, 2, figure=fig_svg, hspace=0.45, wspace=0.40,
+                         left=0.10, right=0.95, top=0.90, bottom=0.10)
 
-        # 同时保存数据到CSV
-        self._save_comparison_data(selected_algorithms, timestamp)
-
-        return filepath
-
-    def _plot_execution_time_comparison(self, ax, selected_algorithms):
-        """绘制Execution Time对比"""
-        xlabel = 'Iteration'  # 默认xlabel
-
-        for algo in selected_algorithms:
-            if algo not in self.algorithm_data:
-                continue
-
-            data = self.algorithm_data[algo]
-            config = ALGORITHM_CONFIG.get(algo, {})
-
-            # 下采样数据
-            sampled_data = self._downsample_data(data)
-
-            # 提取x轴和y轴数据
-            if 'iteration' in sampled_data[0]:
-                x = [point['iteration'] for point in sampled_data]
-                xlabel = 'Iteration'
-            else:
-                x = [point.get('M', point.get('task_count', i)) for i, point in enumerate(sampled_data)]
-                xlabel = 'Task Count'
-
-            y = [point['execution_time'] for point in sampled_data]
-
-            # 绘制曲线
-            ax.plot(x, y,
-                   color=config.get('color', 'blue'),
-                   linestyle=config.get('linestyle', '-'),
-                   marker=config.get('marker', 'o'),
-                   linewidth=2.5,
-                   markersize=8,
-                   label=config.get('label', algo),
-                   alpha=0.85)
-
-        ax.set_xlabel(xlabel, fontsize=12, fontweight='bold')
-        ax.set_ylabel('Execution Time (Time Units)', fontsize=12, fontweight='bold')
-        ax.set_title('(a) Execution Time Comparison', fontsize=13, fontweight='bold')
-        ax.legend(fontsize=10, loc='best', framealpha=0.9)
-        ax.grid(True, alpha=0.3)
-
-    def _plot_cost_comparison(self, ax, selected_algorithms):
-        """绘制Total Cost对比"""
-        xlabel = 'Iteration'  # 默认xlabel
-
-        for algo in selected_algorithms:
-            if algo not in self.algorithm_data:
-                continue
-
-            data = self.algorithm_data[algo]
-            config = ALGORITHM_CONFIG.get(algo, {})
-
-            # 下采样数据
-            sampled_data = self._downsample_data(data)
-
-            # 提取x轴和y轴数据
-            if 'iteration' in sampled_data[0]:
-                x = [point['iteration'] for point in sampled_data]
-                xlabel = 'Iteration'
-            else:
-                x = [point.get('M', point.get('task_count', i)) for i, point in enumerate(sampled_data)]
-                xlabel = 'Task Count'
-
-            y = [point['total_cost'] for point in sampled_data]
-
-            # 绘制曲线
-            ax.plot(x, y,
-                   color=config.get('color', 'blue'),
-                   linestyle=config.get('linestyle', '-'),
-                   marker=config.get('marker', 'o'),
-                   linewidth=2.5,
-                   markersize=8,
-                   label=config.get('label', algo),
-                   alpha=0.85)
-
-        ax.set_xlabel(xlabel, fontsize=12, fontweight='bold')
-        ax.set_ylabel('Total Cost', fontsize=12, fontweight='bold')
-        ax.set_title('(b) Total Cost Comparison', fontsize=13, fontweight='bold')
-        ax.legend(fontsize=10, loc='best', framealpha=0.9)
-        ax.grid(True, alpha=0.3)
-
-    def _plot_load_balance_comparison(self, ax, selected_algorithms):
-        """绘制Load Balance对比"""
-        xlabel = 'Iteration'  # 默认xlabel
-
-        for algo in selected_algorithms:
-            if algo not in self.algorithm_data:
-                continue
-
-            data = self.algorithm_data[algo]
-            config = ALGORITHM_CONFIG.get(algo, {})
-
-            # 下采样数据
-            sampled_data = self._downsample_data(data)
-
-            # 提取x轴和y轴数据
-            if 'iteration' in sampled_data[0]:
-                x = [point['iteration'] for point in sampled_data]
-                xlabel = 'Iteration'
-            else:
-                x = [point.get('M', point.get('task_count', i)) for i, point in enumerate(sampled_data)]
-                xlabel = 'Task Count'
-
-            y = [point['load_balance'] for point in sampled_data]
-
-            # 绘制曲线
-            ax.plot(x, y,
-                   color=config.get('color', 'blue'),
-                   linestyle=config.get('linestyle', '-'),
-                   marker=config.get('marker', 'o'),
-                   linewidth=2.5,
-                   markersize=8,
-                   label=config.get('label', algo),
-                   alpha=0.85)
-
-        ax.set_xlabel(xlabel, fontsize=12, fontweight='bold')
-        ax.set_ylabel('Load Balance (Higher is Better)', fontsize=12, fontweight='bold')
-        ax.set_title('(c) Load Balance Comparison', fontsize=13, fontweight='bold')
-        ax.legend(fontsize=10, loc='best', framealpha=0.9)
-        ax.grid(True, alpha=0.3)
-
-    def _plot_price_efficiency_comparison(self, ax, selected_algorithms):
-        """绘制Price Efficiency对比"""
-        xlabel = 'Iteration'  # 默认xlabel
-
-        for algo in selected_algorithms:
-            if algo not in self.algorithm_data:
-                continue
-
-            data = self.algorithm_data[algo]
-            config = ALGORITHM_CONFIG.get(algo, {})
-
-            # 下采样数据
-            sampled_data = self._downsample_data(data)
-
-            # 提取x轴和y轴数据
-            if 'iteration' in sampled_data[0]:
-                x = [point['iteration'] for point in sampled_data]
-                xlabel = 'Iteration'
-            else:
-                x = [point.get('M', point.get('task_count', i)) for i, point in enumerate(sampled_data)]
-                xlabel = 'Task Count'
-
-            y = [point['price_efficiency'] for point in sampled_data]
-
-            # 绘制曲线
-            ax.plot(x, y,
-                   color=config.get('color', 'blue'),
-                   linestyle=config.get('linestyle', '-'),
-                   marker=config.get('marker', 'o'),
-                   linewidth=2.5,
-                   markersize=8,
-                   label=config.get('label', algo),
-                   alpha=0.85)
-
-        ax.set_xlabel(xlabel, fontsize=12, fontweight='bold')
-        ax.set_ylabel('Price Efficiency (Higher is Better)', fontsize=12, fontweight='bold')
-        ax.set_title('(d) Price Efficiency Comparison', fontsize=13, fontweight='bold')
-        ax.legend(fontsize=10, loc='best', framealpha=0.9)
-        ax.grid(True, alpha=0.3)
-
-    def _save_comparison_data(self, selected_algorithms, timestamp):
-        """保存对比数据到CSV和Excel"""
-        # 准备数据
+        fig_svg.suptitle(title, fontsize=21, fontweight='bold', y=0.96)
+        
+        # 重新绘制四个子图（字体会自动按比例放大）
+        ax1_svg = fig_svg.add_subplot(gs_svg[0, 0])
+        self._plot_metric(ax1_svg, selected_algorithms, 'execution_time',
+                         'Execution Time (s)', '(a) Execution Time')
+        
+        ax2_svg = fig_svg.add_subplot(gs_svg[0, 1])
+        self._plot_metric(ax2_svg, selected_algorithms, 'total_cost',
+                         'Total Cost ($)', '(b) Total Cost')
+        
+        ax3_svg = fig_svg.add_subplot(gs_svg[1, 0])
+        self._plot_metric(ax3_svg, selected_algorithms, 'load_balance',
+                         'Load Balance Index', '(c) Load Balance')
+        
+        ax4_svg = fig_svg.add_subplot(gs_svg[1, 1])
+        self._plot_metric(ax4_svg, selected_algorithms, 'price_efficiency',
+                         'Price Efficiency Index', '(d) Price Efficiency')
+        
+        # 保存SVG
+        svg_path = f'{base_path}.svg'
+        plt.savefig(svg_path, format='svg', bbox_inches='tight',
+                   facecolor='white', edgecolor='none')
+        print(f"  ✓ 保存SVG: {output_suffix}.svg (15×12.75英寸, 可编辑)")
+        
+        plt.close(fig_svg)
+        
+        # 保存数据
+        self._save_data(selected_algorithms, output_suffix)
+        
+        return png_path
+    
+    def _save_data(self, selected_algorithms, output_suffix):
+        """保存对比数据到Excel"""
         all_data = []
         for algo in selected_algorithms:
             if algo not in self.algorithm_data:
@@ -384,130 +373,52 @@ class MultiAlgorithmChartGenerator:
                 row['algorithm'] = algo
                 all_data.append(row)
 
-        # 转换为DataFrame
         df = pd.DataFrame(all_data)
-
-        # 保存CSV
-        csv_path = os.path.join(self.output_dir,
-                                f'{self.chart_set}_comparison_data_{timestamp}.csv')
-        df.to_csv(csv_path, index=False, encoding='utf-8-sig')
-        print(f"对比数据已保存 (CSV): {csv_path}")
-
-        # 保存Excel
-        try:
-            excel_path = os.path.join(self.output_dir,
-                                     f'{self.chart_set}_comparison_data_{timestamp}.xlsx')
-            df.to_excel(excel_path, index=False, sheet_name='Comparison Data')
-            print(f"对比数据已保存 (Excel): {excel_path}")
-        except Exception as e:
-            print(f"警告: 无法保存Excel文件: {e}")
-
-    def generate_individual_metric_charts(self, selected_algorithms=None):
-        """生成单独的指标对比图（每个指标一张图）"""
-        if selected_algorithms is None:
-            selected_algorithms = list(self.algorithm_data.keys())
-
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        filepaths = []
-
-        metrics = {
-            'execution_time': ('Execution Time', 'Execution Time (Time Units)', '(a)'),
-            'total_cost': ('Total Cost', 'Total Cost', '(b)'),
-            'load_balance': ('Load Balance', 'Load Balance (Higher is Better)', '(c)'),
-            'price_efficiency': ('Price Efficiency', 'Price Efficiency (Higher is Better)', '(d)')
-        }
-
-        for metric_key, (title, ylabel, label_prefix) in metrics.items():
-            fig, ax = plt.subplots(figsize=(12, 8))
-
-            for algo in selected_algorithms:
-                if algo not in self.algorithm_data:
-                    continue
-
-                data = self.algorithm_data[algo]
-                config = ALGORITHM_CONFIG.get(algo, {})
-
-                # 下采样数据
-                sampled_data = self._downsample_data(data)
-
-                # 提取数据
-                if 'iteration' in sampled_data[0]:
-                    x = [point['iteration'] for point in sampled_data]
-                    xlabel = 'Iteration'
-                else:
-                    x = [point.get('M', point.get('task_count', i)) for i, point in enumerate(sampled_data)]
-                    xlabel = 'Task Count'
-
-                y = [point[metric_key] for point in sampled_data]
-
-                # 绘制
-                ax.plot(x, y,
-                       color=config.get('color', 'blue'),
-                       linestyle=config.get('linestyle', '-'),
-                       marker=config.get('marker', 'o'),
-                       linewidth=2.5,
-                       markersize=7,
-                       label=config.get('label', algo),
-                       alpha=0.85)
-
-            ax.set_xlabel(xlabel, fontsize=14, fontweight='bold')
-            ax.set_ylabel(ylabel, fontsize=14, fontweight='bold')
-            ax.set_title(f'{label_prefix} {title} Comparison - {self.chart_set}',
-                        fontsize=15, fontweight='bold')
-            ax.legend(fontsize=12, loc='best', framealpha=0.95)
-            ax.grid(True, alpha=0.4, linestyle='--')
-
-            # 保存
-            filepath = os.path.join(self.output_dir,
-                                   f'{self.chart_set}_{metric_key}_{timestamp}.png')
-            plt.tight_layout()
-            plt.savefig(filepath, bbox_inches='tight', dpi=300)
-            plt.close(fig)
-            filepaths.append(filepath)
-            print(f"单指标图表已保存: {filepath}")
-
-        return filepaths
+        # 数据文件也保存在对应的子目录中
+        chart_set_dir = os.path.join(self.output_dir, self.chart_set)
+        os.makedirs(chart_set_dir, exist_ok=True)
+        excel_path = os.path.join(chart_set_dir, f'{output_suffix}_data.xlsx')
+        df.to_excel(excel_path, index=False, sheet_name='Comparison Data')
+        print(f"  ✓ 保存数据: {output_suffix}_data.xlsx")
+    
+    def cleanup_old_files(self):
+        """清理旧的时间戳文件"""
+        pattern = os.path.join(self.output_dir, f'{self.chart_set}_*_2025*.png')
+        old_files = glob.glob(pattern)
+        
+        for file in old_files:
+            try:
+                os.remove(file)
+            except OSError:
+                pass
 
 
-
-def generate_chart_for_set(raw_data_dir, chart_set, output_dir, max_points=20,
-                          algorithms=None, individual=False):
-    """
-    为指定图表集生成图表
-
-    参数:
-        raw_data_dir: RAW数据目录路径
-        chart_set: 图表集名称
-        output_dir: 输出目录
-        max_points: 最大显示点数
-        algorithms: 选择要对比的算法列表
-        individual: 是否同时生成单独的指标图表
-
-    返回:
-        是否成功生成
-    """
+def generate_charts_for_set(chart_set_name, raw_data_dir, output_dir):
+    """为指定图表集生成所有必要的图表"""
+    print(f"\n{'='*60}")
+    print(f"处理: {chart_set_name}")
+    print(f"{'='*60}")
+    
     try:
-        generator = MultiAlgorithmChartGenerator(
-            raw_data_dir,
-            chart_set=chart_set,
-            output_dir=output_dir,
-            max_points=max_points
-        )
-
-        # 生成综合对比图
-        print("\n生成综合对比图...")
-        filepath1 = generator.generate_comprehensive_comparison(algorithms)
-
-        # 生成单独指标图（如果启用）
-        if individual:
-            print("\n生成单独指标图...")
-            filepaths = generator.generate_individual_metric_charts(algorithms)
-            print(f"\n生成了 {len(filepaths)} 个单独指标图")
-
-        print(f"\n{chart_set} 图表生成完成！")
+        generator = ChartGenerator(raw_data_dir, chart_set_name, output_dir)
+        
+        # 生成 BCBO vs BCBO-DE 对比图
+        print("生成 BCBO vs BCBO-DE 对比图...")
+        generator.generate_comprehensive_comparison(['BCBO', 'BCBO-DE'], 'BCBO_vs_BCBO-DE')
+        
+        # 生成所有算法对比图
+        print("生成所有算法对比图...")
+        all_algos = list(generator.algorithm_data.keys())
+        generator.generate_comprehensive_comparison(all_algos, 'All_Algorithms')
+        
+        # 清理旧文件
+        generator.cleanup_old_files()
+        
+        print(f"✓ {chart_set_name} 完成")
         return True
+        
     except Exception as e:
-        print(f"\n错误: 处理 {chart_set} 时发生错误: {e}")
+        print(f"✗ 错误: {e}")
         import traceback
         traceback.print_exc()
         return False
@@ -516,86 +427,48 @@ def generate_chart_for_set(raw_data_dir, chart_set, output_dir, max_points=20,
 def main():
     """主函数"""
     import argparse
-
-    parser = argparse.ArgumentParser(description='多算法对比图表生成工具')
-    parser.add_argument('--raw-data-dir', type=str,
-                       default=DEFAULT_RAW_DATA_DIR,
-                       help=f'RAW_data目录路径 (默认: {DEFAULT_RAW_DATA_DIR})')
+    
+    parser = argparse.ArgumentParser(description='论文级图表生成工具')
+    parser.add_argument('--raw-data-dir', type=str, default=DEFAULT_RAW_DATA_DIR,
+                       help='RAW_data目录路径')
     parser.add_argument('--chart-set', type=int, choices=[1, 2, 3, 4],
                        help='指定要生成图表的图表集编号')
     parser.add_argument('--output-dir', type=str, default=DEFAULT_OUTPUT_DIR,
-                       help=f'输出目录 (默认: {DEFAULT_OUTPUT_DIR})')
-    parser.add_argument('--algorithms', type=str, nargs='+',
-                       help='选择要对比的算法（空格分隔）')
+                       help='输出目录')
     parser.add_argument('--all', action='store_true',
                        help='生成所有图表集的图表')
-    parser.add_argument('--individual', action='store_true',
-                       help='同时生成单独的指标图表')
-    parser.add_argument('--max-points', type=int, default=20,
-                       help='每条曲线的最大显示点数（默认20，减少密度让曲线更清晰）')
-
+    
     args = parser.parse_args()
-
-    print("="*80)
-    print("多算法对比 - 论文级图表生成工具")
-    print("="*80)
+    
+    print("="*60)
+    print("论文级图表生成工具 - 简化版")
+    print("="*60)
     print(f"RAW数据目录: {args.raw_data_dir}")
     print(f"输出目录: {args.output_dir}")
-    print(f"最大显示点数: {args.max_points} (从原始数据中采样)")
-
+    
     # 验证目录存在
     if not os.path.exists(args.raw_data_dir):
-        print(f"\n[ERROR] RAW数据目录不存在: {args.raw_data_dir}")
-        print(f"[提示] 请确保数据文件在正确的位置")
+        print(f"\n✗ 错误: RAW数据目录不存在: {args.raw_data_dir}")
         return 1
-
-    # 创建输出目录
+    
     os.makedirs(args.output_dir, exist_ok=True)
-    print(f"[OK] 输出目录已准备: {args.output_dir}")
-    print("="*80)
-
-    # 命令行参数模式
+    
+    # 生成图表
     if args.chart_set:
         # 生成指定的图表集
         chart_set_name = f'chart_set_{args.chart_set}'
-
-        print(f"\n[TARGET] 生成图表: chart set {args.chart_set}")
-        if args.algorithms:
-            print(f"[ALGORITHM] 指定算法: {', '.join(args.algorithms)}")
-
-        success = generate_chart_for_set(
-            args.raw_data_dir,
-            chart_set_name,
-            args.output_dir,
-            args.max_points,
-            args.algorithms,
-            args.individual
-        )
-
+        success = generate_charts_for_set(chart_set_name, args.raw_data_dir, args.output_dir)
         return 0 if success else 1
-
+        
     elif args.all:
         # 生成所有图表集
-        print("\n[START] 生成所有图表集的图表")
-        chart_sets = ['chart_set_1', 'chart_set_2', 'chart_set_3', 'chart_set_4']
-
-        for chart_set in chart_sets:
-            print(f"\n{'='*80}")
-            print(f"处理图表集: {chart_set}")
-            print(f"{'='*80}")
-
-            generate_chart_for_set(
-                args.raw_data_dir,
-                chart_set,
-                args.output_dir,
-                args.max_points,
-                args.algorithms,
-                args.individual
-            )
-
-        print("\n[SUCCESS] 所有图表生成完成!")
+        print("\n开始生成所有图表集...")
+        for i in range(1, 5):
+            chart_set_name = f'chart_set_{i}'
+            generate_charts_for_set(chart_set_name, args.raw_data_dir, args.output_dir)
+        print("\n✓ 所有图表生成完成!")
         return 0
-
+        
     else:
         # 交互式模式
         while True:
@@ -607,63 +480,32 @@ def main():
             print("5. 生成所有图表集")
             print("0. 退出")
             print("-" * 60)
-
+            
             try:
                 choice = input("请输入选项 (0-5): ").strip()
                 choice = int(choice)
-
+                
                 if choice == 0:
-                    print("[EXIT] 退出程序")
+                    print("退出程序")
                     break
-
+                    
                 elif choice in [1, 2, 3, 4]:
                     chart_set_name = f'chart_set_{choice}'
-
-                    # 询问是否生成单独指标图
-                    individual_choice = input("\n是否同时生成单独的指标图表? (y/n, 默认n): ").strip().lower()
-                    individual = (individual_choice == 'y')
-
-                    generate_chart_for_set(
-                        args.raw_data_dir,
-                        chart_set_name,
-                        args.output_dir,
-                        args.max_points,
-                        args.algorithms,
-                        individual
-                    )
-
+                    generate_charts_for_set(chart_set_name, args.raw_data_dir, args.output_dir)
+                    
                 elif choice == 5:
-                    # 生成所有图表集
-                    print("\n[START] 生成所有图表集的图表")
-
-                    # 询问是否生成单独指标图
-                    individual_choice = input("\n是否同时生成单独的指标图表? (y/n, 默认n): ").strip().lower()
-                    individual = (individual_choice == 'y')
-
-                    chart_sets = ['chart_set_1', 'chart_set_2', 'chart_set_3', 'chart_set_4']
-                    for chart_set in chart_sets:
-                        print(f"\n{'='*80}")
-                        print(f"处理图表集: {chart_set}")
-                        print(f"{'='*80}")
-
-                        generate_chart_for_set(
-                            args.raw_data_dir,
-                            chart_set,
-                            args.output_dir,
-                            args.max_points,
-                            args.algorithms,
-                            individual
-                        )
-
-                    print("\n[SUCCESS] 所有图表生成完成!")
-
+                    for i in range(1, 5):
+                        chart_set_name = f'chart_set_{i}'
+                        generate_charts_for_set(chart_set_name, args.raw_data_dir, args.output_dir)
+                    print("\n✓ 所有图表生成完成!")
+                    
                 else:
-                    print("[ERROR] 无效选项，请重新选择")
-
+                    print("✗ 无效选项，请重新选择")
+                    
             except (ValueError, KeyboardInterrupt):
-                print("\n[EXIT] 退出程序")
+                print("\n退出程序")
                 break
-
+    
     return 0
 
 
