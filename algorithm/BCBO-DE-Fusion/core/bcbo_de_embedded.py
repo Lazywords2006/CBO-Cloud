@@ -37,6 +37,14 @@ from de_operators import DEOperators
 from utils.diversity_calculator import DiversityCalculator
 from utils.adaptive_controller import AdaptiveFController, AdaptiveCRController
 from utils.performance_monitor import PerformanceMonitor
+from utils.adaptive_strategies import (
+    get_adaptive_fusion_intensity,
+    get_scale_adaptive_params,
+    get_combined_fusion_intensity,
+    ConvergenceMonitor,
+    EliteProtectionConfig,
+    apply_scale_adaptive_params
+)
 import numpy as np  # 需要使用np.random.random()判断融合强度
 
 
@@ -75,6 +83,10 @@ class BCBO_DE_Embedded:
         self.de_config = DE_CONFIG.copy()
         self.de_config.update(kwargs.get('de_config', {}))
 
+        # 3.5. 规模自适应调整（新增）
+        self.scale_params = get_scale_adaptive_params(M, N)
+        self.de_config = apply_scale_adaptive_params(self.de_config, self.scale_params)
+
         # 4. 创建DE算子实例
         self.de_operators = DEOperators(
             M=M, N=N,
@@ -85,16 +97,18 @@ class BCBO_DE_Embedded:
         # 5. 初始化融合配置
         self.fusion_config = FUSION_CONFIG.copy()
         self.fusion_config.update(kwargs.get('fusion_config', {}))
+        # 应用规模自适应的精英比例
+        self.fusion_config['elite_ratio'] = self.scale_params['elite_ratio']
 
         # 6. 初始化自适应控制器(使用优化后的参数)
         self.F_controller = AdaptiveFController(
-            F_max=self.de_config.get('F_max', 0.4),   # 优化: 降低自0.9
-            F_min=self.de_config.get('F_min', 0.15),  # 优化: 降低自0.4
+            F_max=self.de_config.get('F_max', 0.32),  # 基准值
+            F_min=self.de_config.get('F_min', 0.18),  # 基准值
             alpha=self.de_config['alpha']
         )
         self.CR_controller = AdaptiveCRController(
-            CR_min=self.de_config.get('CR_min', 0.3), # 优化: 降低自0.5
-            CR_max=self.de_config.get('CR_max', 0.7)  # 优化: 降低自0.9
+            CR_min=self.de_config.get('CR_min', 0.28), # 基准值
+            CR_max=self.de_config.get('CR_max', 0.62)  # 基准值
         )
 
         # 7. 初始化性能监控器
@@ -103,7 +117,10 @@ class BCBO_DE_Embedded:
         # 8. 初始化多样性计算器
         self.diversity_calculator = DiversityCalculator()
 
-        # 9. 初始化全局最优
+        # 9. 初始化收敛监控器（新增）
+        self.convergence_monitor = ConvergenceMonitor(patience=10)
+
+        # 10. 初始化全局最优
         self.global_best_solution = None
         self.global_best_fitness = float('-inf')
 
@@ -112,6 +129,10 @@ class BCBO_DE_Embedded:
             print(f"  任务数M={M}, VM数N={N}, 种群大小n={n}, 迭代次数={iterations}")
             print(f"  融合阶段: {FUSION_PHASES}")
             print(f"  纯BCBO阶段: {PURE_BCBO_PHASES}")
+            print(f"  规模自适应参数: F_scale={self.scale_params['F_scale']:.2f}, "
+                  f"CR_scale={self.scale_params['CR_scale']:.2f}, "
+                  f"elite_ratio={self.scale_params['elite_ratio']:.2%}, "
+                  f"intensity_scale={self.scale_params['intensity_scale']:.2f}")
 
     def run_fusion_optimization(self) -> Dict:
         """
@@ -136,15 +157,28 @@ class BCBO_DE_Embedded:
             # 2. 判断是否为融合阶段
             is_fusion = self._is_fusion_phase(current_phase)
 
-            # 3. 获取融合强度(渐进式融合策略)
-            fusion_intensity = get_fusion_intensity(current_phase)
+            # 3. 更新收敛监控器
+            self.convergence_monitor.update(self.global_best_fitness)
 
-            # 4. 根据融合强度决定是否应用DE
+            # 4. 获取收敛状态调整建议
+            convergence_adjustment = self.convergence_monitor.get_adaptive_adjustment()
+
+            # 5. 计算综合融合强度（整合三维自适应）
+            fusion_intensity = get_combined_fusion_intensity(
+                phase=current_phase,
+                iteration=iteration,
+                total_iterations=self.iterations,
+                M=self.M,
+                N=self.N,
+                convergence_adjustment=convergence_adjustment['intensity_adjust']
+            )
+
+            # 6. 根据融合强度决定是否应用DE
             apply_de = is_fusion and (np.random.random() < fusion_intensity)
 
-            # 5. 执行对应的更新策略
+            # 7. 执行对应的更新策略
             if apply_de:
-                population = self._bcbo_de_fusion_update(
+                population = self._bcbo_de_fusion_update_v2(
                     population, current_phase, iteration
                 )
                 update_type = f"BCBO-DE融合({fusion_intensity*100:.0f}%)"
@@ -154,14 +188,14 @@ class BCBO_DE_Embedded:
                 )
                 update_type = "纯BCBO"
 
-            # 6. 更新全局最优
+            # 8. 更新全局最优
             for individual in population:
                 fitness = self.bcbo.comprehensive_fitness(individual)
                 if fitness > self.global_best_fitness:
                     self.global_best_fitness = fitness
                     self.global_best_solution = copy.deepcopy(individual)
 
-            # 7. 记录历史
+            # 9. 记录历史
             bcbo_ratio = self._get_current_bcbo_ratio(population, iteration, current_phase)
             self.monitor.record(
                 iteration=iteration,
@@ -173,12 +207,14 @@ class BCBO_DE_Embedded:
                 best_solution=copy.deepcopy(self.global_best_solution)
             )
 
-            # 8. 打印信息
+            # 10. 打印信息（增强版）
             if self.verbose and (iteration % self.print_interval == 0 or iteration == self.iterations - 1):
                 diversity = self.diversity_calculator.hamming_distance_diversity(population)
+                conv_status = self.convergence_monitor.get_status()
                 print(f"Iter {iteration:3d} | 阶段: {current_phase:15s} | "
-                      f"更新: {update_type:20s} | 最优适应度: {self.global_best_fitness:.6f} | "
-                      f"多样性: {diversity:.4f} | BCBO比例: {bcbo_ratio:.2f}")
+                      f"更新: {update_type:20s} | 最优: {self.global_best_fitness:.6f} | "
+                      f"多样性: {diversity:.4f} | 停滞: {conv_status['stagnation_count']:2d} | "
+                      f"强度: {fusion_intensity:.3f}")
 
         # 7. 生成结果
         result = {
@@ -216,6 +252,8 @@ class BCBO_DE_Embedded:
         修复 (2025-11-24):
         问题: 在融合阶段(encircle/attack)没有执行BCBO更新,导致性能下降
         修复: 所有阶段都先执行BCBO更新,确保基础优化逻辑
+
+        注意: 此方法保留作为备用，新版本使用 _bcbo_de_fusion_update_v2
         """
         # 步骤1: 全员执行 BCBO 更新
         # 修复: 无论什么阶段,都先执行BCBO更新,确保基础优化
@@ -228,7 +266,7 @@ class BCBO_DE_Embedded:
             key=lambda x: self.bcbo.comprehensive_fitness(x),
             reverse=True
         )
-        
+
         elite_ratio = self.fusion_config.get('elite_ratio', 0.2) # 默认 20% 精英
         elite_count = max(1, int(len(population) * elite_ratio))
         elites = sorted_pop[:elite_count]
@@ -237,7 +275,7 @@ class BCBO_DE_Embedded:
         # 步骤3: DE 精英增强
         # 仅对精英应用 DE，试图找到更好的解
         enhanced_elites = []
-        
+
         # 获取自适应参数
         current_F = self.F_controller.get_F(iteration, self.iterations)
         # 精英开发阶段，CR 可以稍大，保留更多优良基因，或者根据多样性调整
@@ -248,7 +286,7 @@ class BCBO_DE_Embedded:
             # 变异: 使用 DE/best/1 或 DE/current-to-best/1
             # 这里我们用 DE/best/1，因为 target 本身就是精英之一，best 也是精英
             # 为了避免陷入局部最优，可以引入 random 扰动
-            
+
             # 从整个种群中选择基向量，增加差异性
             mutant = self.de_operators.mutate(
                 population, target, current_F # 注意这里用 population 作为变异池
@@ -270,7 +308,93 @@ class BCBO_DE_Embedded:
         # 步骤4: 合并
         # 保持原来的顺序可能不重要，但为了逻辑清晰，我们重新组合
         final_population = enhanced_elites + others
-        
+
+        return final_population
+
+    def _bcbo_de_fusion_update_v2(self, population: List, phase: str, iteration: int) -> List:
+        """
+        BCBO-DE融合更新 v2.0（增强精英保护版）
+
+        改进策略 (2025-11-27):
+        1. 分级精英保护：
+           - Top 50%精英：严格保护（需提升2%才接受DE结果）
+           - 其余50%精英：正常DE增强
+        2. Top精英使用更保守的DE参数（F×0.7, CR×0.8）
+        3. 规模自适应精英比例
+
+        参数:
+            population: 当前种群
+            phase: 当前阶段
+            iteration: 当前迭代
+
+        返回:
+            final_population: 更新后的种群
+        """
+        # 步骤1: 全员执行 BCBO 更新
+        bcbo_updated_pop = self._bcbo_pure_update(population, phase, iteration)
+
+        # 步骤2: 识别精英（使用规模自适应比例）
+        elite_ratio = self.fusion_config.get('elite_ratio', 0.2)
+
+        sorted_pop = sorted(
+            bcbo_updated_pop,
+            key=lambda x: self.bcbo.comprehensive_fitness(x),
+            reverse=True
+        )
+
+        elite_count = max(1, int(len(population) * elite_ratio))
+        elites = sorted_pop[:elite_count]
+        others = sorted_pop[elite_count:]
+
+        # 步骤3: 分级精英保护
+        # 将精英分为两组：
+        # - Top 50%的精英：严格保护
+        # - 其余50%精英：正常应用DE
+        top_elite_count = max(1, elite_count // 2)
+        top_elites = elites[:top_elite_count]
+        mid_elites = elites[top_elite_count:]
+
+        # 获取基础DE参数
+        current_F = self.F_controller.get_F(iteration, self.iterations)
+        current_diversity = self._calculate_diversity(population)
+        current_CR = self.CR_controller.get_CR(current_diversity)
+
+        # 步骤4: 对mid_elites正常应用DE
+        enhanced_mid_elites = []
+        for target in mid_elites:
+            mutant = self.de_operators.mutate(bcbo_updated_pop, target, current_F)
+            trial = self.de_operators.crossover(target, mutant, current_CR)
+            selected = self.de_operators.select(
+                target, trial,
+                fitness_func=self.bcbo.comprehensive_fitness
+            )
+            enhanced_mid_elites.append(selected)
+
+        # 步骤5: 对top_elites严格保护
+        # 获取保护参数（v3.2：使用规模自适应阈值）
+        protection_params = EliteProtectionConfig.get_protection_params('top', M=self.M)
+        protected_F = current_F * protection_params['f_decay']
+        protected_CR = current_CR * protection_params['cr_decay']
+        threshold = protection_params['threshold']
+
+        protected_top_elites = []
+        for target in top_elites:
+            target_fitness = self.bcbo.comprehensive_fitness(target)
+
+            # 使用更保守的DE参数
+            mutant = self.de_operators.mutate(bcbo_updated_pop, target, protected_F)
+            trial = self.de_operators.crossover(target, mutant, protected_CR)
+            trial_fitness = self.bcbo.comprehensive_fitness(trial)
+
+            # 严格选择：必须提升threshold以上才接受
+            if trial_fitness > target_fitness * (1 + threshold):
+                protected_top_elites.append(trial)
+            else:
+                protected_top_elites.append(target)  # 保持原解
+
+        # 步骤6: 合并
+        final_population = protected_top_elites + enhanced_mid_elites + others
+
         return final_population
 
     def _bcbo_pure_update(self, population: List, phase: str, iteration: int) -> List:

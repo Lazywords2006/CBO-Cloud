@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python:*)",
+      "Bash(timeout 240 python quick_test_v3.py)",
+      "Bash(timeout 480 python multi_scenario_test_v3.py)",
+      "Bash(tee:*)",
+      "Bash(timeout 1800 python comprehensive_test_v3.3.py)",
+      "Bash(taskkill:*)",
+      "Bash(git add:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
