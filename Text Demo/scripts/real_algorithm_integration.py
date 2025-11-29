@@ -93,7 +93,10 @@ try:
     if os.path.exists(bcbo_de_core_path) and bcbo_de_core_path not in sys.path:
         sys.path.insert(0, bcbo_de_core_path)
         print(f"[INFO] 添加路径: {bcbo_de_core_path}")
+
+    # 强制使用原版(已添加负载均衡修复)
     from bcbo_de_embedded import BCBO_DE_Embedded
+    print("[INFO] 使用BCBO-DE原版 (v3.2 + 负载均衡修复)")
 except ImportError as e:
     print(f"[WARNING] 无法导入 BCBO_DE_Embedded，该算法将不可用: {e}")
     BCBO_DE_Embedded = None
@@ -536,7 +539,7 @@ class RealAlgorithmIntegrator:
         return self._format_result('GWO', result, algo)
 
     def _run_bcbo_de(self, M, N, n, iterations, random_seed):
-        """运行BCBO-DE嵌入式融合算法"""
+        """运行BCBO-DE嵌入式融合算法（v3.2 + 负载均衡修复版）"""
         if BCBO_DE_Embedded is None:
             raise RuntimeError("BCBO-DE算法不可用")
 
@@ -567,7 +570,8 @@ class RealAlgorithmIntegrator:
             bcbo_instance.vm_cost = self.problem_instance['vm_cost']
             bcbo_instance.vm_energy_efficiency = self.problem_instance['vm_energy_efficiency']
             bcbo_instance.execution_time = self.problem_instance['execution_time']
-            print(f"[DEBUG] BCBO-DE使用共享问题实例: execution_time shape={bcbo_instance.execution_time.shape}")
+
+            print(f"[DEBUG] BCBO-DE使用共享问题实例 (v3.2+负载修复): execution_time shape={bcbo_instance.execution_time.shape}")
 
         result = algo.run_fusion_optimization()
 

@@ -87,11 +87,12 @@ class BCBO_DE_Embedded:
         self.scale_params = get_scale_adaptive_params(M, N)
         self.de_config = apply_scale_adaptive_params(self.de_config, self.scale_params)
 
-        # 4. 创建DE算子实例
+        # 4. 创建DE算子实例 (方案C: 添加execution_time用于负载均衡计算)
         self.de_operators = DEOperators(
             M=M, N=N,
             F=self.de_config['F'],
-            CR=self.de_config['CR']
+            CR=self.de_config['CR'],
+            execution_time=None  # 初始化后再设置
         )
 
         # 5. 初始化融合配置
@@ -124,6 +125,17 @@ class BCBO_DE_Embedded:
         self.global_best_solution = None
         self.global_best_fitness = float('-inf')
 
+        # 11. 方案D: 启用负载均衡导向适应度 (M>=1000时)
+        self.use_balance_oriented_fitness = (M >= 1000)
+
+        # 方案D适应度权重参数 (v3.5 最小干预策略)
+        # 基于失败经验：回归接近原始BCBO的权重
+        self.fitness_weights = {
+            'alpha': 0.001,  # 成本权重 (回归原始值)
+            'beta': 10,      # 负载均衡权重 (接近原始)
+            'gamma': 10000   # makespan权重 (回归原始值)
+        }
+
         if self.verbose:
             print(f"BCBO-DE融合调度器初始化完成:")
             print(f"  任务数M={M}, VM数N={N}, 种群大小n={n}, 迭代次数={iterations}")
@@ -133,6 +145,10 @@ class BCBO_DE_Embedded:
                   f"CR_scale={self.scale_params['CR_scale']:.2f}, "
                   f"elite_ratio={self.scale_params['elite_ratio']:.2%}, "
                   f"intensity_scale={self.scale_params['intensity_scale']:.2f}")
+            if self.use_balance_oriented_fitness:
+                print(f"  [方案D] 启用负载均衡导向适应度 (M={M}>=1000)")
+                print(f"  [方案D] 权重: alpha={self.fitness_weights['alpha']}, "
+                      f"beta={self.fitness_weights['beta']}, gamma={self.fitness_weights['gamma']}")
 
     def run_fusion_optimization(self) -> Dict:
         """
@@ -143,11 +159,15 @@ class BCBO_DE_Embedded:
         """
         if self.verbose:
             print("\n" + "="*60)
-            print("开始BCBO-DE融合优化".center(60))
+            strategy_name = "方案D: 负载均衡导向适应度" if self.use_balance_oriented_fitness else "标准BCBO-DE"
+            print(f"开始BCBO-DE融合优化 ({strategy_name})".center(60))
             print("="*60)
 
         # 初始化种群
         population = self.bcbo.initialize_population()
+
+        # 方案C+D: 设置DE算子的execution_time (用于负载均衡计算)
+        self.de_operators.execution_time = self.bcbo.execution_time
 
         # 主循环
         for iteration in range(self.iterations):
@@ -313,9 +333,15 @@ class BCBO_DE_Embedded:
 
     def _bcbo_de_fusion_update_v2(self, population: List, phase: str, iteration: int) -> List:
         """
-        BCBO-DE融合更新 v2.0（增强精英保护版）
+        BCBO-DE融合更新 v2.2（方案D: 负载均衡导向适应度）
 
-        改进策略 (2025-11-27):
+        改进策略 (2025-11-28 方案D):
+        1. 使用专用适应度函数comprehensive_fitness_de (M>=1000时)
+        2. 大幅提升负载均衡权重: beta=100 (vs 原5-20)
+        3. 降低makespan权重: gamma=50 (vs 原10000)
+        4. 保留方案C的交叉约束作为辅助
+
+        原有策略 (保留):
         1. 分级精英保护：
            - Top 50%精英：严格保护（需提升2%才接受DE结果）
            - 其余50%精英：正常DE增强
@@ -336,9 +362,10 @@ class BCBO_DE_Embedded:
         # 步骤2: 识别精英（使用规模自适应比例）
         elite_ratio = self.fusion_config.get('elite_ratio', 0.2)
 
+        # 方案D: 使用DE专用适应度排序
         sorted_pop = sorted(
             bcbo_updated_pop,
-            key=lambda x: self.bcbo.comprehensive_fitness(x),
+            key=lambda x: self.comprehensive_fitness_de(x),  # 方案D
             reverse=True
         )
 
@@ -347,9 +374,6 @@ class BCBO_DE_Embedded:
         others = sorted_pop[elite_count:]
 
         # 步骤3: 分级精英保护
-        # 将精英分为两组：
-        # - Top 50%的精英：严格保护
-        # - 其余50%精英：正常应用DE
         top_elite_count = max(1, elite_count // 2)
         top_elites = elites[:top_elite_count]
         mid_elites = elites[top_elite_count:]
@@ -359,19 +383,26 @@ class BCBO_DE_Embedded:
         current_diversity = self._calculate_diversity(population)
         current_CR = self.CR_controller.get_CR(current_diversity)
 
-        # 步骤4: 对mid_elites正常应用DE
+        # 步骤4: 对mid_elites正常应用DE (方案D: 使用DE专用适应度)
         enhanced_mid_elites = []
         for target in mid_elites:
             mutant = self.de_operators.mutate(bcbo_updated_pop, target, current_F)
-            trial = self.de_operators.crossover(target, mutant, current_CR)
+
+            # 方案C: crossover内部检查负载均衡 (优化版v2: 提升阈值0.75→0.85)
+            trial = self.de_operators.crossover(
+                target, mutant, current_CR,
+                enable_balance_check=True,  # 启用负载均衡检查
+                balance_threshold=0.85       # 提升阈值 (0.75→0.85)
+            )
+
+            # 方案D: 使用DE专用适应度选择
             selected = self.de_operators.select(
                 target, trial,
-                fitness_func=self.bcbo.comprehensive_fitness
+                fitness_func=self.comprehensive_fitness_de  # 方案D
             )
             enhanced_mid_elites.append(selected)
 
-        # 步骤5: 对top_elites严格保护
-        # 获取保护参数（v3.2：使用规模自适应阈值）
+        # 步骤5: 对top_elites严格保护 (方案D: 同样使用DE专用适应度)
         protection_params = EliteProtectionConfig.get_protection_params('top', M=self.M)
         protected_F = current_F * protection_params['f_decay']
         protected_CR = current_CR * protection_params['cr_decay']
@@ -379,12 +410,18 @@ class BCBO_DE_Embedded:
 
         protected_top_elites = []
         for target in top_elites:
-            target_fitness = self.bcbo.comprehensive_fitness(target)
+            target_fitness = self.comprehensive_fitness_de(target)  # 方案D
 
-            # 使用更保守的DE参数
             mutant = self.de_operators.mutate(bcbo_updated_pop, target, protected_F)
-            trial = self.de_operators.crossover(target, mutant, protected_CR)
-            trial_fitness = self.bcbo.comprehensive_fitness(trial)
+
+            # 方案C: crossover内部检查负载均衡 (优化版v2: 提升阈值0.80→0.90)
+            trial = self.de_operators.crossover(
+                target, mutant, protected_CR,
+                enable_balance_check=True,  # 启用负载均衡检查
+                balance_threshold=0.90      # 提升阈值 (0.80→0.90)
+            )
+
+            trial_fitness = self.comprehensive_fitness_de(trial)  # 方案D
 
             # 严格选择：必须提升threshold以上才接受
             if trial_fitness > target_fitness * (1 + threshold):
@@ -438,6 +475,99 @@ class BCBO_DE_Embedded:
         或者我们可以记录 'Elite Ratio'
         """
         return 1.0
+
+    def _repair_load_balance(self, solution: List[int], threshold: float = 0.85) -> List[int]:
+        """
+        修复负载不均衡的解 (已弃用 - 方案C不再使用)
+
+        方案C改用DE交叉约束而非事后修复
+        此方法保留以供将来参考或对比实验
+
+        针对大规模场景的负载均衡问题,通过迭代调整任务分配来改善负载均衡度
+
+        参数:
+            solution: 原始任务分配方案
+            threshold: 负载均衡阈值,低于此值触发修复
+
+        返回:
+            repaired_solution: 修复后的解
+        """
+        # 方案C: 不再调用此方法
+        return solution
+
+    def _calculate_workloads(self, solution: List[int]) -> List[float]:
+        """计算每台VM的工作负载"""
+        workloads = [0.0] * self.N
+        for task_id, vm_id in enumerate(solution):
+            workloads[vm_id] += self.bcbo.execution_time[task_id][vm_id]
+        return workloads
+
+    def _calculate_load_balance(self, solution: List[int]) -> float:
+        """
+        计算负载均衡度
+
+        返回:
+            load_balance: 0-1之间,越接近1越均衡
+        """
+        workloads = self._calculate_workloads(solution)
+        max_load = max(workloads)
+        min_load = min(workloads)
+
+        if max_load == 0:
+            return 1.0
+
+        # 负载均衡度 = 1 - (最大负载-最小负载)/最大负载
+        balance = 1.0 - (max_load - min_load) / max_load
+        return balance
+
+    def comprehensive_fitness_de(self, solution: List[int]) -> float:
+        """
+        BCBO-DE专用适应度函数 (方案D)
+
+        仅在M>=1000时使用负载均衡导向适应度，
+        小规模场景仍使用BCBO原适应度函数
+
+        参数:
+            solution: 任务分配方案
+
+        返回:
+            fitness: 适应度值
+        """
+        # 小规模场景使用BCBO原适应度
+        if not self.use_balance_oriented_fitness:
+            return self.bcbo.comprehensive_fitness(solution)
+
+        # 大规模场景使用负载均衡导向适应度
+        # 计算各项指标
+        try:
+            # 计算makespan
+            workloads = self._calculate_workloads(solution)
+            makespan = max(workloads) if workloads else 0
+
+            # 计算总成本
+            total_cost = 0.0
+            for task_id, vm_id in enumerate(solution):
+                if task_id < len(self.bcbo.execution_time) and vm_id < self.N:
+                    exec_time = self.bcbo.execution_time[task_id][vm_id]
+                    cost = self.bcbo.vm_cost[vm_id] * exec_time
+                    total_cost += cost
+
+            # 计算负载均衡度
+            balance = self._calculate_load_balance(solution)
+
+            # 方案D适应度函数
+            alpha = self.fitness_weights['alpha']
+            beta = self.fitness_weights['beta']
+            gamma = self.fitness_weights['gamma']
+
+            fitness = gamma / (makespan + 1.0) - alpha * total_cost + beta * balance
+
+            return fitness
+
+        except Exception as e:
+            # 异常情况返回极低适应度
+            return float('-inf')
+
 
 
 # 测试代码

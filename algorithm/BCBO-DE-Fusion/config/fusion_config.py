@@ -59,9 +59,9 @@ PURE_BCBO_PHASES = [
 ]
 
 # 渐进式融合强度(不同阶段的DE应用概率)
-# v3.0 (2025-11-27): 以下值作为基准值，实际使用时通过余弦衰减动态调整
-# 策略: 大幅降低DE融合强度，减少对BCBO优秀解的破坏
-# 原因: 分析发现在M>=500的大规模问题上，过强的DE融合导致性能下降
+# v3.5 (2025-11-29): 最小干预策略
+# 核心改进: 极低融合强度，最小化对BCBO的干扰
+# 测试目标: 保持BCBO优势的同时提供边际改进
 #
 # 注意: 这些是基础强度值，实际强度会经过以下调整：
 #   1. 余弦衰减（随迭代降低）
@@ -71,12 +71,12 @@ PURE_BCBO_PHASES = [
 # 最终强度 = 基础强度 × cosine_decay × scale_factor × convergence_factor
 #
 PHASE_FUSION_INTENSITY = {
-    'dynamic_search': 0.0,    # 不融合,保持BCBO探索
-    'static_search': 0.0,     # 不融合
-    'encircle_dynamic': 0.20, # 20%基础概率 (从0.3降低)
-    'encircle_static': 0.28,  # 28%基础概率 (从0.5降低)
-    'attack_dynamic': 0.25,   # 25%基础概率 (从0.6降低)
-    'attack_static': 0.22     # 22%基础概率 (从0.7大幅降低)
+    'dynamic_search': 0.0,    # 0%基础概率 (v3.5: 完全不融合)
+    'static_search': 0.0,     # 0%基础概率 (v3.5: 完全不融合)
+    'encircle_dynamic': 0.02, # 2%基础概率 (v3.5: 极低融合)
+    'encircle_static': 0.03,  # 3%基础概率 (v3.5: 极低融合)
+    'attack_dynamic': 0.05,   # 5%基础概率 (v3.5: 低融合)
+    'attack_static': 0.08     # 8%基础概率 (v3.5: 低融合)
 }
 
 

@@ -7,7 +7,21 @@
       "Bash(tee:*)",
       "Bash(timeout 1800 python comprehensive_test_v3.3.py)",
       "Bash(taskkill:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(iconv:*)",
+      "Bash(timeout 600 python test_bcbo_de_optimized.py --all)",
+      "Bash(awk:*)",
+      "Bash(timeout 240 python test_repair_debug.py)",
+      "Bash(timeout 180 python test_repair_debug.py)",
+      "Bash(timeout 180 python test_solution_c.py)",
+      "Bash(timeout 600 python generate_bcbo_comparison.py --chart-set 4)",
+      "Bash(timeout 480 python test_solution_c_comprehensive.py)",
+      "Bash(timeout 480 python test_solution_d.py)",
+      "Bash(timeout 480 python test_solution_d_v2.py)",
+      "Bash(timeout 480 python quick_test_d_v2.py)",
+      "Bash(timeout 240 python comprehensive_tuning_test.py)",
+      "Bash(timeout 300 python generate_bcbo_comparison.py --chart-set 1)"
     ],
     "deny": [],
     "ask": []

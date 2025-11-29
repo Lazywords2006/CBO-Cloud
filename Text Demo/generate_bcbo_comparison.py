@@ -121,9 +121,9 @@ class BCBOComparisonGenerator:
             result: 算法运行结果
         """
         try:
-            # 将random_seed添加到params中而不是作为单独参数
+            # 使用固定seed确保BCBO和BCBO-DE比较相同的问题实例（v3.2方法）
             params_with_seed = params.copy()
-            params_with_seed['random_seed'] = np.random.randint(1, 1000000)
+            params_with_seed['random_seed'] = 42  # 固定seed，确保公平比较
 
             result = self.integrator.run_algorithm(
                 algorithm_name=algorithm,
