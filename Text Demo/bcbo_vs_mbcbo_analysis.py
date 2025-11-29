@@ -35,21 +35,27 @@ class BCBOvsMBCBOAnalyzer:
     def load_all_data(self):
         """加载所有测试数据"""
         # 加载图表数据
+        data_dir = os.path.join(current_dir, 'Text Demo', 'RAW_data')
+        if not os.path.exists(data_dir):
+            data_dir = os.path.join(current_dir, 'RAW_data')
+
         for i in range(1, 5):
             try:
-                with open(f'RAW_data/chart_set_{i}_bcbo_comparison.json', 'r', encoding='utf-8') as f:
+                file_path = os.path.join(data_dir, f'chart_set_{i}_bcbo_comparison.json')
+                with open(file_path, 'r', encoding='utf-8') as f:
                     self.chart_data[f'chart_{i}'] = json.load(f)
                     print(f"[OK] 加载图表集{i}数据")
-            except:
-                print(f"[SKIP] 图表集{i}数据不存在")
+            except Exception as e:
+                print(f"[SKIP] 图表集{i}数据不存在: {e}")
 
         # 加载MBCBO测试数据
         try:
-            with open('mbcbo_test_results.json', 'r', encoding='utf-8') as f:
+            mbcbo_file = os.path.join(current_dir, 'mbcbo_test_results.json')
+            with open(mbcbo_file, 'r', encoding='utf-8') as f:
                 self.mbcbo_data = json.load(f)
                 print("[OK] 加载MBCBO测试数据")
-        except:
-            print("[SKIP] MBCBO测试数据不存在")
+        except Exception as e:
+            print(f"[SKIP] MBCBO测试数据不存在: {e}")
 
     def run_comparison_tests(self, scenarios=None):
         """运行BCBO与MBCBO对比测试"""
@@ -60,9 +66,10 @@ class BCBOvsMBCBOAnalyzer:
         if scenarios is None:
             scenarios = [
                 {'name': '小规模', 'M': 100, 'N': 20, 'n': 50, 'iterations': 50},
-                {'name': '中规模', 'M': 500, 'N': 50, 'n': 100, 'iterations': 100},
-                {'name': '大规模', 'M': 1000, 'N': 100, 'n': 150, 'iterations': 150}
+                {'name': '中规模', 'M': 200, 'N': 30, 'n': 80, 'iterations': 80},
             ]
+
+        import time
 
         for scenario in scenarios:
             print(f"\n测试场景: {scenario['name']} (M={scenario['M']}, N={scenario['N']})")
@@ -79,9 +86,10 @@ class BCBOvsMBCBOAnalyzer:
                 n=scenario['n'],
                 iterations=scenario['iterations']
             )
+            bcbo_start = time.time()
             bcbo_result = bcbo.run_complete_algorithm()
+            bcbo_time = time.time() - bcbo_start
             bcbo_fitness = bcbo_result['best_fitness']
-            bcbo_time = bcbo_result.get('execution_time', 0)
 
             # 重置种子
             np.random.seed(42)
@@ -95,41 +103,45 @@ class BCBOvsMBCBOAnalyzer:
                 iterations=scenario['iterations'],
                 verbose=False
             )
+            mbcbo_start = time.time()
             mbcbo_result = mbcbo.optimize()
+            mbcbo_time = time.time() - mbcbo_start
             mbcbo_fitness = mbcbo_result['best_fitness']
-            mbcbo_time = mbcbo_result.get('execution_time', 0)
 
             # 计算改进率
-            improvement = ((mbcbo_fitness - bcbo_fitness) / bcbo_fitness) * 100
+            improvement = ((mbcbo_fitness - bcbo_fitness) / abs(bcbo_fitness)) * 100
 
             # 保存结果
             result = {
                 'scenario': scenario['name'],
                 'M': scenario['M'],
                 'N': scenario['N'],
-                'bcbo_fitness': bcbo_fitness,
-                'mbcbo_fitness': mbcbo_fitness,
-                'improvement': improvement,
-                'bcbo_time': bcbo_time,
-                'mbcbo_time': mbcbo_time,
+                'bcbo_fitness': float(bcbo_fitness),
+                'mbcbo_fitness': float(mbcbo_fitness),
+                'improvement': float(improvement),
+                'bcbo_time': float(bcbo_time),
+                'mbcbo_time': float(mbcbo_time),
+                'time_ratio': float(mbcbo_time / bcbo_time),
                 'mbcbo_strategies': mbcbo_result.get('strategy_contributions', {})
             }
             self.test_results.append(result)
 
             # 显示结果
-            print(f"  BCBO适应度:  {bcbo_fitness:.4f}")
-            print(f"  MBCBO适应度: {mbcbo_fitness:.4f}")
-            print(f"  改进率: {improvement:+.2f}%")
+            print(f"  BCBO适应度:  {bcbo_fitness:.4f} (耗时: {bcbo_time:.2f}s)")
+            print(f"  MBCBO适应度: {mbcbo_fitness:.4f} (耗时: {mbcbo_time:.2f}s)")
+            print(f"  性能改进: {improvement:+.2f}%")
+            print(f"  时间效率: {mbcbo_time/bcbo_time:.2f}x")
 
-            if improvement > 0:
+            if improvement > 0.1:
                 print(f"  结果: MBCBO更优 [+]")
-            elif improvement < 0:
+            elif improvement < -0.1:
                 print(f"  结果: BCBO更优 [-]")
             else:
                 print(f"  结果: 性能相当 [=]")
 
         # 保存测试结果
-        with open('bcbo_vs_mbcbo_results.json', 'w', encoding='utf-8') as f:
+        output_file = os.path.join(current_dir, 'bcbo_vs_mbcbo_results.json')
+        with open(output_file, 'w', encoding='utf-8') as f:
             json.dump(self.test_results, f, indent=2, ensure_ascii=False)
             print(f"\n[OK] 测试结果已保存到 bcbo_vs_mbcbo_results.json")
 

@@ -23,7 +23,9 @@
       "Bash(timeout 240 python comprehensive_tuning_test.py)",
       "Bash(timeout 300 python generate_bcbo_comparison.py --chart-set 1)",
       "Bash(git checkout:*)",
-      "Bash(timeout 180 python quick_bcbo_mbcbo_test.py)"
+      "Bash(timeout 180 python quick_bcbo_mbcbo_test.py)",
+      "Bash(timeout 180 python test_mbcbo_optimization.py)",
+      "Bash(timeout 300 python bcbo_vs_mbcbo_analysis.py)"
     ],
     "deny": [],
     "ask": []

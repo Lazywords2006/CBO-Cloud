@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-单独生成BCBO和BCBO-DE数据的脚本
+生成BCBO、BCBO-DE和MBCBO数据的脚本
 ========================================
-专门用于生成和对比BCBO与BCBO-DE两个算法的性能数据
-不包含其他对比算法，数据生成更快
+用于生成和对比BCBO、BCBO-DE与MBCBO三个算法的性能数据
+为期刊发表提供完整的算法对比数据
 """
 
 import sys
@@ -96,12 +96,12 @@ CHART_CONFIGS = {
     }
 }
 
-# 只包含BCBO和BCBO-DE两个算法
-ALGORITHMS = ['BCBO', 'BCBO-DE']
+# 包含BCBO、BCBO-DE和MBCBO三个算法
+ALGORITHMS = ['BCBO', 'BCBO-DE', 'MBCBO']
 
 
 class BCBOComparisonGenerator:
-    """BCBO与BCBO-DE对比数据生成器"""
+    """BCBO、BCBO-DE与MBCBO对比数据生成器"""
 
     def __init__(self):
         self.integrator = RealAlgorithmIntegrator()

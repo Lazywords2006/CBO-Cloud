@@ -84,6 +84,9 @@ class MBCBO_CloudScheduler:
         self.global_best_solution = None
         self.global_best_fitness = float('-inf')
 
+        # 添加收敛历史记录
+        self.fitness_history = []
+
         if self.verbose:
             print(f"MBCBO多策略协同算法初始化完成")
             print(f"  任务数M={M}, VM数N={N}, 总种群n={n}")
@@ -123,6 +126,14 @@ class MBCBO_CloudScheduler:
             # 2. 更新全局最优
             self._update_global_best(subpopulations)
 
+            # 记录收敛历史
+            self.fitness_history.append({
+                'iteration': iteration + 1,
+                'best_fitness': self.global_best_fitness,
+                'best_solution': copy.deepcopy(self.global_best_solution),
+                'global_best_fitness': self.global_best_fitness
+            })
+
             # 3. 信息交换（每隔一定代数）
             if (iteration + 1) % self.exchange_interval == 0:
                 subpopulations = self._information_exchange(subpopulations)
@@ -140,7 +151,8 @@ class MBCBO_CloudScheduler:
             'best_solution': self.global_best_solution,
             'best_fitness': self.global_best_fitness,
             'strategy_contributions': self._calculate_contributions(),
-            'final_ratios': self.subpop_ratios.tolist()
+            'final_ratios': self.subpop_ratios.tolist(),
+            'convergence_history': self.fitness_history  # 添加收敛历史
         }
 
         if self.verbose:

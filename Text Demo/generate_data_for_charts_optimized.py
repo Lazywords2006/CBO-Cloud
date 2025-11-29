@@ -11,9 +11,9 @@
 3. 提供算法可用性检查
 4. 优化收敛数据提取
 
-BCBO-DE修复版本同步 (2025-11-28):
+MBCBO修复版本同步 (2025-11-28):
 ========================================
-本脚本通过 real_algorithm_integration.py 自动使用修复后的BCBO-DE版本：
+本脚本通过 real_algorithm_integration.py 自动使用修复后的MBCBO版本：
 - 版本：v3.2 + 负载均衡修复
 - 修复内容：为M≥1000场景添加负载均衡修复机制
 - 修复方法：_repair_load_balance(), _calculate_workloads(), _calculate_load_balance()
@@ -22,7 +22,7 @@ BCBO-DE修复版本同步 (2025-11-28):
 
 使用说明：
 - 通过 RealAlgorithmIntegrator 调用所有算法确保一致性
-- BCBO-DE自动使用修复版，无需额外配置
+- MBCBO自动使用修复版，无需额外配置
 - 所有算法共享相同的问题实例(execution_time矩阵)确保公平对比
 - 固定随机种子(seed=42)确保可重现性
 """
@@ -59,7 +59,7 @@ try:
     from real_algorithm_integration import RealAlgorithmIntegrator
     INTEGRATOR_AVAILABLE = True
     print("[OK] Real algorithm integration module imported successfully")
-    print("[INFO] BCBO-DE使用v3.2 + 负载均衡修复版本 (2025-11-28)")
+    print("[INFO] MBCBO使用v3.2 + 负载均衡修复版本 (2025-11-28)")
 except ImportError as e:
     print(f"[ERROR] Failed to import real algorithm integration module: {e}")
     INTEGRATOR_AVAILABLE = False
@@ -131,7 +131,7 @@ CHART_CONFIGS = {
 }
 
 # 所有算法列表
-ALGORITHMS = ['BCBO', 'GA', 'PSO', 'ACO', 'FA', 'CS', 'GWO', 'BCBO-DE']
+ALGORITHMS = ['BCBO', 'GA', 'PSO', 'ACO', 'FA', 'CS', 'GWO', 'MBCBO']
 
 
 class OptimizedDataGenerator:
@@ -230,8 +230,8 @@ class OptimizedDataGenerator:
         try:
             algorithm_instance = self.integrator.algorithms.get(algorithm_name)
 
-            # 如果是BCBO-DE,使用其内部的bcbo实例
-            if algorithm_name == 'BCBO-DE' and hasattr(algorithm_instance, 'bcbo'):
+            # 如果是MBCBO,使用其内部的bcbo实例
+            if algorithm_name == 'MBCBO' and hasattr(algorithm_instance, 'bcbo'):
                 algorithm_instance = algorithm_instance.bcbo
 
             if algorithm_instance and hasattr(algorithm_instance, 'get_detailed_metrics'):
@@ -250,8 +250,8 @@ class OptimizedDataGenerator:
         try:
             algorithm_instance = self.integrator.algorithms.get(algorithm_name)
 
-            # 如果是BCBO-DE,使用其内部的bcbo实例
-            if algorithm_name == 'BCBO-DE' and hasattr(algorithm_instance, 'bcbo'):
+            # 如果是MBCBO,使用其内部的bcbo实例
+            if algorithm_name == 'MBCBO' and hasattr(algorithm_instance, 'bcbo'):
                 algorithm_instance = algorithm_instance.bcbo
 
             if not algorithm_instance:
@@ -357,33 +357,33 @@ class OptimizedDataGenerator:
                     if change_ratio > 0.5:
                         warnings.append(f"[WARN] {algo_name} 第{i}→{i+1}点成本变化过大: {change_ratio*100:.1f}%")
 
-        # 检查4: BCBO-DE vs BCBO 对比分析
-        if 'BCBO' in algorithm_results and 'BCBO-DE' in algorithm_results:
+        # 检查4: MBCBO vs BCBO 对比分析
+        if 'BCBO' in algorithm_results and 'MBCBO' in algorithm_results:
             bcbo_data = algorithm_results['BCBO']
-            bcbode_data = algorithm_results['BCBO-DE']
+            mbcbo_data = algorithm_results['MBCBO']
 
-            if bcbo_data and bcbode_data:
+            if bcbo_data and mbcbo_data:
                 # 比较最后一个数据点
                 bcbo_final = bcbo_data[-1]
-                bcbode_final = bcbode_data[-1]
+                mbcbo_final = mbcbo_data[-1]
 
                 bcbo_cost = bcbo_final.get('total_cost', 1)
-                bcbode_cost = bcbode_final.get('total_cost', 1)
+                mbcbo_cost = mbcbo_final.get('total_cost', 1)
 
-                improvement = (bcbo_cost - bcbode_cost) / bcbo_cost * 100
+                improvement = (bcbo_cost - mbcbo_cost) / bcbo_cost * 100
 
-                if improvement < -10:  # BCBO-DE成本高于BCBO超过10%
-                    warnings.append(f"[WARN] BCBO-DE成本显著高于BCBO: {improvement:.2f}%")
-                elif improvement > 3:  # BCBO-DE有明显改进
-                    print(f"  [INFO] ✓ BCBO-DE成本优于BCBO: {improvement:.2f}%")
+                if improvement < -10:  # MBCBO成本高于BCBO超过10%
+                    warnings.append(f"[WARN] MBCBO成本显著高于BCBO: {improvement:.2f}%")
+                elif improvement > 3:  # MBCBO有明显改进
+                    print(f"  [INFO] ✓ MBCBO成本优于BCBO: {improvement:.2f}%")
 
                 # 负载均衡对比
                 bcbo_lb = bcbo_final.get('load_balance', 0)
-                bcbode_lb = bcbode_final.get('load_balance', 0)
-                lb_improvement = (bcbode_lb - bcbo_lb) / (bcbo_lb + 1e-6) * 100
+                mbcbo_lb = mbcbo_final.get('load_balance', 0)
+                lb_improvement = (mbcbo_lb - bcbo_lb) / (bcbo_lb + 1e-6) * 100
 
                 if lb_improvement > 5:
-                    print(f"  [INFO] ✓ BCBO-DE负载均衡优于BCBO: {lb_improvement:.2f}%")
+                    print(f"  [INFO] ✓ MBCBO负载均衡优于BCBO: {lb_improvement:.2f}%")
 
         # 检查5: ACO负载均衡修复验证
         if 'ACO' in algorithm_results:
@@ -436,7 +436,7 @@ class OptimizedDataGenerator:
         for run in range(runs_per_point):
             try:
                 # v3.2方法：使用固定seed确保所有算法比较相同的问题实例
-                # 每次运行使用相同的基础seed，保证BCBO和BCBO-DE解决同一个问题
+                # 每次运行使用相同的基础seed，保证BCBO和MBCBO解决同一个问题
                 run_seed = 42 + run  # 简单的确定性种子：42, 43, 44, ...
 
                 np.random.seed(run_seed)

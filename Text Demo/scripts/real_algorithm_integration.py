@@ -34,10 +34,11 @@ ALGORITHM_ROOT = os.path.join(PROJECT_ROOT, 'algorithm')
 
 BCBO_DIR = os.path.join(ALGORITHM_ROOT, 'BCBO')
 BCBO_DE_DIR = os.path.join(ALGORITHM_ROOT, 'BCBO-DE-Fusion')
+MBCBO_DIR = os.path.join(ALGORITHM_ROOT, 'MBCBO')  # 添加MBCBO目录
 OTHER_ALGO_DIR = os.path.join(ALGORITHM_ROOT, 'other_algorithms')
 
 # 添加到系统路径
-for path in [BCBO_DIR, BCBO_DE_DIR, OTHER_ALGO_DIR]:
+for path in [BCBO_DIR, BCBO_DE_DIR, MBCBO_DIR, OTHER_ALGO_DIR]:
     abs_path = os.path.abspath(path)
     if os.path.exists(abs_path) and abs_path not in sys.path:
         sys.path.insert(0, abs_path)
@@ -101,6 +102,14 @@ except ImportError as e:
     print(f"[WARNING] 无法导入 BCBO_DE_Embedded，该算法将不可用: {e}")
     BCBO_DE_Embedded = None
 
+try:
+    # 导入MBCBO算法
+    from mbcbo_cloud_scheduler import MBCBO_CloudScheduler
+    print("[INFO] 成功导入 MBCBO_CloudScheduler")
+except ImportError as e:
+    print(f"[WARNING] 无法导入 MBCBO_CloudScheduler，该算法将不可用: {e}")
+    MBCBO_CloudScheduler = None
+
 
 class RealAlgorithmIntegrator:
     """
@@ -137,6 +146,8 @@ class RealAlgorithmIntegrator:
             self.available_algorithms.append('GWO')
         if BCBO_DE_Embedded is not None:
             self.available_algorithms.append('BCBO-DE')
+        if MBCBO_CloudScheduler is not None:
+            self.available_algorithms.append('MBCBO')
 
         print(f"[INFO] 算法集成器初始化完成")
         print(f"[INFO] 可用算法: {', '.join(self.available_algorithms)}")
@@ -214,6 +225,8 @@ class RealAlgorithmIntegrator:
                 return self._run_gwo(M, N, n, iterations, random_seed)
             elif algorithm_name == 'BCBO-DE':
                 return self._run_bcbo_de(M, N, n, iterations, random_seed)
+            elif algorithm_name == 'MBCBO':
+                return self._run_mbcbo(M, N, n, iterations, random_seed)
             else:
                 raise ValueError(f"不支持的算法: {algorithm_name}")
 
@@ -578,6 +591,41 @@ class RealAlgorithmIntegrator:
         self.algorithms['BCBO-DE'] = algo
 
         return self._format_result('BCBO-DE', result, algo)
+
+    def _run_mbcbo(self, M, N, n, iterations, random_seed):
+        """运行MBCBO多策略协同算法"""
+        if MBCBO_CloudScheduler is None:
+            raise RuntimeError("MBCBO算法不可用")
+
+        # ===== BUG修复 (2025-11-27): 使用共享问题实例 =====
+        algo = MBCBO_CloudScheduler(M, N, n, iterations, verbose=False)
+
+        # 强制使用缓存的问题实例
+        if self.problem_instance is not None:
+            algo.task_loads = self.problem_instance['task_loads']
+            algo.vm_caps = self.problem_instance['vm_caps']
+            algo.task_cpu = self.problem_instance['task_cpu']
+            algo.task_memory = self.problem_instance['task_memory']
+            algo.task_storage = self.problem_instance['task_storage']
+            algo.task_network = self.problem_instance['task_network']
+            algo.task_priority = self.problem_instance['task_priority']
+            algo.task_deadline = self.problem_instance['task_deadline']
+            algo.task_data_size = self.problem_instance['task_data_size']
+            algo.vm_cpu_capacity = self.problem_instance['vm_cpu_capacity']
+            algo.vm_memory_capacity = self.problem_instance['vm_memory_capacity']
+            algo.vm_storage_capacity = self.problem_instance['vm_storage_capacity']
+            algo.vm_network_capacity = self.problem_instance['vm_network_capacity']
+            algo.vm_processing_speed = self.problem_instance['vm_processing_speed']
+            algo.vm_cost = self.problem_instance['vm_cost']
+            algo.vm_energy_efficiency = self.problem_instance['vm_energy_efficiency']
+            algo.execution_time = self.problem_instance['execution_time']
+            print(f"[DEBUG] MBCBO使用共享问题实例: execution_time shape={algo.execution_time.shape}")
+
+        result = algo.optimize()
+
+        self.algorithms['MBCBO'] = algo
+
+        return self._format_result('MBCBO', result, algo)
 
     def _format_result(self, algorithm_name, result, algo_instance):
         """

@@ -4,7 +4,7 @@
 论文级图表生成工具 - 简化版
 =========================================
 只生成两种核心图表:
-1. BCBO vs BCBO-DE 对比图
+1. BCBO vs MBCBO 对比图
 2. 所有算法对比图
 """
 
@@ -80,10 +80,10 @@ ALGORITHM_CONFIG = {
         'marker': 'o',
         'markersize': 7
     },
-    'BCBO-DE': {
+    'MBCBO': {
         'color': '#e41a1c',      # 鲜红色 - 提出的算法（强调）
-        'label': 'BCBO-DE', 
-        'linestyle': '-', 
+        'label': 'MBCBO',
+        'linestyle': '-',
         'marker': 's',
         'markersize': 8,
         'linewidth': 2.5          # 加粗以强调
@@ -402,9 +402,9 @@ def generate_charts_for_set(chart_set_name, raw_data_dir, output_dir):
     try:
         generator = ChartGenerator(raw_data_dir, chart_set_name, output_dir)
         
-        # 生成 BCBO vs BCBO-DE 对比图
-        print("生成 BCBO vs BCBO-DE 对比图...")
-        generator.generate_comprehensive_comparison(['BCBO', 'BCBO-DE'], 'BCBO_vs_BCBO-DE')
+        # 生成 BCBO vs MBCBO 对比图
+        print("生成 BCBO vs MBCBO 对比图...")
+        generator.generate_comprehensive_comparison(['BCBO', 'MBCBO'], 'BCBO_vs_MBCBO')
         
         # 生成所有算法对比图
         print("生成所有算法对比图...")
