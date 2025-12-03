@@ -1,31 +1,9 @@
 {
   "permissions": {
     "allow": [
-      "Bash(python:*)",
-      "Bash(timeout 240 python quick_test_v3.py)",
-      "Bash(timeout 480 python multi_scenario_test_v3.py)",
-      "Bash(tee:*)",
-      "Bash(timeout 1800 python comprehensive_test_v3.3.py)",
-      "Bash(taskkill:*)",
-      "Bash(git add:*)",
-      "Bash(git commit:*)",
-      "Bash(iconv:*)",
-      "Bash(timeout 600 python test_bcbo_de_optimized.py --all)",
-      "Bash(awk:*)",
-      "Bash(timeout 240 python test_repair_debug.py)",
-      "Bash(timeout 180 python test_repair_debug.py)",
-      "Bash(timeout 180 python test_solution_c.py)",
-      "Bash(timeout 600 python generate_bcbo_comparison.py --chart-set 4)",
-      "Bash(timeout 480 python test_solution_c_comprehensive.py)",
-      "Bash(timeout 480 python test_solution_d.py)",
-      "Bash(timeout 480 python test_solution_d_v2.py)",
-      "Bash(timeout 480 python quick_test_d_v2.py)",
-      "Bash(timeout 240 python comprehensive_tuning_test.py)",
-      "Bash(timeout 300 python generate_bcbo_comparison.py --chart-set 1)",
-      "Bash(git checkout:*)",
-      "Bash(timeout 180 python quick_bcbo_mbcbo_test.py)",
-      "Bash(timeout 180 python test_mbcbo_optimization.py)",
-      "Bash(timeout 300 python bcbo_vs_mbcbo_analysis.py)"
+      "Bash(cat:*)",
+      "Bash(timeout 7200 python:*)",
+      "Bash(python:*)"
     ],
     "deny": [],
     "ask": []

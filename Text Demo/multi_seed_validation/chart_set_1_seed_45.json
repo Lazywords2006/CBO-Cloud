@@ -1,0 +1,1867 @@
+{
+  "chart_set": "chart_set_1",
+  "config": {
+    "name": "图表集1 - 迭代次数 vs 性能指标 (小规模)",
+    "type": "iterations",
+    "variable_param": "iterations",
+    "values": [
+      5,
+      10,
+      15,
+      20,
+      25,
+      30,
+      35,
+      40,
+      45,
+      50,
+      55,
+      60,
+      65,
+      70,
+      75,
+      80,
+      85,
+      90,
+      95,
+      100
+    ],
+    "fixed_params": {
+      "M": 100,
+      "N": 20,
+      "n": 50
+    },
+    "runs_per_point": 1
+  },
+  "timestamp": "2025-12-02T13:48:02.643027",
+  "algorithms": {
+    "BCBO": {
+      "algorithm": "BCBO",
+      "results": [
+        {
+          "iteration": 1,
+          "total_cost": 1193.9310896898,
+          "execution_time": 870.6886257059526,
+          "load_balance": 0.6788954138797001,
+          "price_efficiency": 0.0008375692766508364,
+          "algorithm": "BCBO",
+          "best_fitness": 83.54078252499849
+        },
+        {
+          "iteration": 2,
+          "total_cost": 1231.8736459596466,
+          "execution_time": 894.9269558020546,
+          "load_balance": 0.6690161639969404,
+          "price_efficiency": 0.0008117715664005576,
+          "algorithm": "BCBO",
+          "best_fitness": 84.17585466020535
+        },
+        {
+          "iteration": 3,
+          "total_cost": 1231.8736459596466,
+          "execution_time": 894.9269558020546,
+          "load_balance": 0.6690161639969404,
+          "price_efficiency": 0.0008117715664005576,
+          "algorithm": "BCBO",
+          "best_fitness": 84.17585466020535
+        },
+        {
+          "iteration": 4,
+          "total_cost": 1231.8736459596466,
+          "execution_time": 894.9269558020546,
+          "load_balance": 0.6690161639969404,
+          "price_efficiency": 0.0008117715664005576,
+          "algorithm": "BCBO",
+          "best_fitness": 84.17585466020535
+        },
+        {
+          "iteration": 5,
+          "total_cost": 1160.7994321626816,
+          "execution_time": 802.2316705229597,
+          "load_balance": 0.7087685928149275,
+          "price_efficiency": 0.0008614752656067621,
+          "algorithm": "BCBO",
+          "best_fitness": 84.68759760856939
+        },
+        {
+          "iteration": 6,
+          "total_cost": 1160.7994321626816,
+          "execution_time": 802.2316705229597,
+          "load_balance": 0.7087685928149275,
+          "price_efficiency": 0.0008614752656067621,
+          "algorithm": "BCBO",
+          "best_fitness": 84.68759760856939
+        },
+        {
+          "iteration": 7,
+          "total_cost": 1160.7994321626816,
+          "execution_time": 802.2316705229597,
+          "load_balance": 0.7087685928149275,
+          "price_efficiency": 0.0008614752656067621,
+          "algorithm": "BCBO",
+          "best_fitness": 84.68759760856939
+        },
+        {
+          "iteration": 8,
+          "total_cost": 1160.7994321626816,
+          "execution_time": 802.2316705229597,
+          "load_balance": 0.7087685928149275,
+          "price_efficiency": 0.0008614752656067621,
+          "algorithm": "BCBO",
+          "best_fitness": 84.68759760856939
+        },
+        {
+          "iteration": 9,
+          "total_cost": 1122.6400450623587,
+          "execution_time": 810.023415941084,
+          "load_balance": 0.6736565494886206,
+          "price_efficiency": 0.000890757463630024,
+          "algorithm": "BCBO",
+          "best_fitness": 84.89630598118521
+        },
+        {
+          "iteration": 10,
+          "total_cost": 1122.6400450623587,
+          "execution_time": 810.023415941084,
+          "load_balance": 0.6736565494886206,
+          "price_efficiency": 0.000890757463630024,
+          "algorithm": "BCBO",
+          "best_fitness": 84.89630598118521
+        },
+        {
+          "iteration": 11,
+          "total_cost": 1122.6400450623587,
+          "execution_time": 810.023415941084,
+          "load_balance": 0.6736565494886206,
+          "price_efficiency": 0.000890757463630024,
+          "algorithm": "BCBO",
+          "best_fitness": 84.89630598118521
+        },
+        {
+          "iteration": 12,
+          "total_cost": 1122.6400450623587,
+          "execution_time": 810.023415941084,
+          "load_balance": 0.6736565494886206,
+          "price_efficiency": 0.000890757463630024,
+          "algorithm": "BCBO",
+          "best_fitness": 84.89630598118521
+        },
+        {
+          "iteration": 13,
+          "total_cost": 1163.2972375064983,
+          "execution_time": 721.016509772108,
+          "load_balance": 0.870718776679583,
+          "price_efficiency": 0.0008596255255310776,
+          "algorithm": "BCBO",
+          "best_fitness": 86.97635256252217
+        },
+        {
+          "iteration": 14,
+          "total_cost": 1147.6052207079122,
+          "execution_time": 630.4860627663244,
+          "load_balance": 0.836485210684234,
+          "price_efficiency": 0.0008713797925315813,
+          "algorithm": "BCBO",
+          "best_fitness": 88.79428951581772
+        },
+        {
+          "iteration": 15,
+          "total_cost": 1167.1174768855024,
+          "execution_time": 617.8133588317082,
+          "load_balance": 0.8636730636092886,
+          "price_efficiency": 0.0008568117768330626,
+          "algorithm": "BCBO",
+          "best_fitness": 89.25150630332493
+        },
+        {
+          "iteration": 16,
+          "total_cost": 1167.9112897925409,
+          "execution_time": 598.6706212916017,
+          "load_balance": 0.9105235366136595,
+          "price_efficiency": 0.0008562294138978681,
+          "algorithm": "BCBO",
+          "best_fitness": 90.00070000871398
+        },
+        {
+          "iteration": 17,
+          "total_cost": 1167.9112897925409,
+          "execution_time": 598.6706212916017,
+          "load_balance": 0.9105235366136595,
+          "price_efficiency": 0.0008562294138978681,
+          "algorithm": "BCBO",
+          "best_fitness": 90.00070000871398
+        },
+        {
+          "iteration": 18,
+          "total_cost": 1169.9355245381605,
+          "execution_time": 585.9827117577571,
+          "load_balance": 0.9218595775210912,
+          "price_efficiency": 0.0008547479567645476,
+          "algorithm": "BCBO",
+          "best_fitness": 90.41745183073996
+        },
+        {
+          "iteration": 19,
+          "total_cost": 1173.31242067895,
+          "execution_time": 582.9620795628417,
+          "load_balance": 0.931911882983173,
+          "price_efficiency": 0.0008522879171167821,
+          "algorithm": "BCBO",
+          "best_fitness": 90.55543697426911
+        },
+        {
+          "iteration": 20,
+          "total_cost": 1173.31242067895,
+          "execution_time": 582.9620795628417,
+          "load_balance": 0.931911882983173,
+          "price_efficiency": 0.0008522879171167821,
+          "algorithm": "BCBO",
+          "best_fitness": 90.55543697426911
+        },
+        {
+          "iteration": 21,
+          "total_cost": 1177.6090495436424,
+          "execution_time": 572.8606562175737,
+          "load_balance": 0.9416554863636467,
+          "price_efficiency": 0.0008491782561779315,
+          "algorithm": "BCBO",
+          "best_fitness": 90.90520024428578
+        },
+        {
+          "iteration": 22,
+          "total_cost": 1177.6090495436424,
+          "execution_time": 572.8606562175737,
+          "load_balance": 0.9416554863636467,
+          "price_efficiency": 0.0008491782561779315,
+          "algorithm": "BCBO",
+          "best_fitness": 90.90520024428578
+        },
+        {
+          "iteration": 23,
+          "total_cost": 1177.6090495436424,
+          "execution_time": 572.8606562175737,
+          "load_balance": 0.9416554863636467,
+          "price_efficiency": 0.0008491782561779315,
+          "algorithm": "BCBO",
+          "best_fitness": 90.90520024428578
+        },
+        {
+          "iteration": 24,
+          "total_cost": 1177.6090495436424,
+          "execution_time": 572.8606562175737,
+          "load_balance": 0.9416554863636467,
+          "price_efficiency": 0.0008491782561779315,
+          "algorithm": "BCBO",
+          "best_fitness": 90.90520024428578
+        },
+        {
+          "iteration": 25,
+          "total_cost": 1177.6090495436424,
+          "execution_time": 572.8606562175737,
+          "load_balance": 0.9416554863636467,
+          "price_efficiency": 0.0008491782561779315,
+          "algorithm": "BCBO",
+          "best_fitness": 90.90520024428578
+        },
+        {
+          "iteration": 26,
+          "total_cost": 1177.6090495436424,
+          "execution_time": 572.8606562175737,
+          "load_balance": 0.9416554863636467,
+          "price_efficiency": 0.0008491782561779315,
+          "algorithm": "BCBO",
+          "best_fitness": 90.90520024428578
+        },
+        {
+          "iteration": 27,
+          "total_cost": 1177.6090495436424,
+          "execution_time": 572.8606562175737,
+          "load_balance": 0.9416554863636467,
+          "price_efficiency": 0.0008491782561779315,
+          "algorithm": "BCBO",
+          "best_fitness": 90.90520024428578
+        },
+        {
+          "iteration": 28,
+          "total_cost": 1177.6090495436424,
+          "execution_time": 572.8606562175737,
+          "load_balance": 0.9416554863636467,
+          "price_efficiency": 0.0008491782561779315,
+          "algorithm": "BCBO",
+          "best_fitness": 90.90520024428578
+        },
+        {
+          "iteration": 29,
+          "total_cost": 1177.6090495436424,
+          "execution_time": 572.8606562175737,
+          "load_balance": 0.9416554863636467,
+          "price_efficiency": 0.0008491782561779315,
+          "algorithm": "BCBO",
+          "best_fitness": 90.90520024428578
+        },
+        {
+          "iteration": 30,
+          "total_cost": 1177.6090495436424,
+          "execution_time": 572.8606562175737,
+          "load_balance": 0.9416554863636467,
+          "price_efficiency": 0.0008491782561779315,
+          "algorithm": "BCBO",
+          "best_fitness": 90.90520024428578
+        },
+        {
+          "iteration": 31,
+          "total_cost": 1177.6090495436424,
+          "execution_time": 572.8606562175737,
+          "load_balance": 0.9416554863636467,
+          "price_efficiency": 0.0008491782561779315,
+          "algorithm": "BCBO",
+          "best_fitness": 90.90520024428578
+        },
+        {
+          "iteration": 32,
+          "total_cost": 1177.6090495436424,
+          "execution_time": 572.8606562175737,
+          "load_balance": 0.9416554863636467,
+          "price_efficiency": 0.0008491782561779315,
+          "algorithm": "BCBO",
+          "best_fitness": 90.90520024428578
+        },
+        {
+          "iteration": 33,
+          "total_cost": 1177.6090495436424,
+          "execution_time": 572.8606562175737,
+          "load_balance": 0.9416554863636467,
+          "price_efficiency": 0.0008491782561779315,
+          "algorithm": "BCBO",
+          "best_fitness": 90.90520024428578
+        },
+        {
+          "iteration": 34,
+          "total_cost": 1177.6090495436424,
+          "execution_time": 572.8606562175737,
+          "load_balance": 0.9416554863636467,
+          "price_efficiency": 0.0008491782561779315,
+          "algorithm": "BCBO",
+          "best_fitness": 90.90520024428578
+        },
+        {
+          "iteration": 35,
+          "total_cost": 1177.6090495436424,
+          "execution_time": 572.8606562175737,
+          "load_balance": 0.9416554863636467,
+          "price_efficiency": 0.0008491782561779315,
+          "algorithm": "BCBO",
+          "best_fitness": 90.90520024428578
+        },
+        {
+          "iteration": 36,
+          "total_cost": 1177.6090495436424,
+          "execution_time": 572.8606562175737,
+          "load_balance": 0.9416554863636467,
+          "price_efficiency": 0.0008491782561779315,
+          "algorithm": "BCBO",
+          "best_fitness": 90.90520024428578
+        },
+        {
+          "iteration": 37,
+          "total_cost": 1177.6090495436424,
+          "execution_time": 572.8606562175737,
+          "load_balance": 0.9416554863636467,
+          "price_efficiency": 0.0008491782561779315,
+          "algorithm": "BCBO",
+          "best_fitness": 90.90520024428578
+        },
+        {
+          "iteration": 38,
+          "total_cost": 1177.6090495436424,
+          "execution_time": 572.8606562175737,
+          "load_balance": 0.9416554863636467,
+          "price_efficiency": 0.0008491782561779315,
+          "algorithm": "BCBO",
+          "best_fitness": 90.90520024428578
+        },
+        {
+          "iteration": 39,
+          "total_cost": 1177.6090495436424,
+          "execution_time": 572.8606562175737,
+          "load_balance": 0.9416554863636467,
+          "price_efficiency": 0.0008491782561779315,
+          "algorithm": "BCBO",
+          "best_fitness": 90.90520024428578
+        },
+        {
+          "iteration": 40,
+          "total_cost": 1177.6090495436424,
+          "execution_time": 572.8606562175737,
+          "load_balance": 0.9416554863636467,
+          "price_efficiency": 0.0008491782561779315,
+          "algorithm": "BCBO",
+          "best_fitness": 90.90520024428578
+        },
+        {
+          "iteration": 41,
+          "total_cost": 1177.6090495436424,
+          "execution_time": 572.8606562175737,
+          "load_balance": 0.9416554863636467,
+          "price_efficiency": 0.0008491782561779315,
+          "algorithm": "BCBO",
+          "best_fitness": 90.90520024428578
+        },
+        {
+          "iteration": 42,
+          "total_cost": 1177.6090495436424,
+          "execution_time": 572.8606562175737,
+          "load_balance": 0.9416554863636467,
+          "price_efficiency": 0.0008491782561779315,
+          "algorithm": "BCBO",
+          "best_fitness": 90.90520024428578
+        },
+        {
+          "iteration": 43,
+          "total_cost": 1177.6090495436424,
+          "execution_time": 572.8606562175737,
+          "load_balance": 0.9416554863636467,
+          "price_efficiency": 0.0008491782561779315,
+          "algorithm": "BCBO",
+          "best_fitness": 90.90520024428578
+        },
+        {
+          "iteration": 44,
+          "total_cost": 1177.6090495436424,
+          "execution_time": 572.8606562175737,
+          "load_balance": 0.9416554863636467,
+          "price_efficiency": 0.0008491782561779315,
+          "algorithm": "BCBO",
+          "best_fitness": 90.90520024428578
+        },
+        {
+          "iteration": 45,
+          "total_cost": 1177.6090495436424,
+          "execution_time": 572.8606562175737,
+          "load_balance": 0.9416554863636467,
+          "price_efficiency": 0.0008491782561779315,
+          "algorithm": "BCBO",
+          "best_fitness": 90.90520024428578
+        },
+        {
+          "iteration": 46,
+          "total_cost": 1177.6090495436424,
+          "execution_time": 572.8606562175737,
+          "load_balance": 0.9416554863636467,
+          "price_efficiency": 0.0008491782561779315,
+          "algorithm": "BCBO",
+          "best_fitness": 90.90520024428578
+        },
+        {
+          "iteration": 47,
+          "total_cost": 1177.6090495436424,
+          "execution_time": 572.8606562175737,
+          "load_balance": 0.9416554863636467,
+          "price_efficiency": 0.0008491782561779315,
+          "algorithm": "BCBO",
+          "best_fitness": 90.90520024428578
+        },
+        {
+          "iteration": 48,
+          "total_cost": 1177.6090495436424,
+          "execution_time": 572.8606562175737,
+          "load_balance": 0.9416554863636467,
+          "price_efficiency": 0.0008491782561779315,
+          "algorithm": "BCBO",
+          "best_fitness": 90.90520024428578
+        },
+        {
+          "iteration": 49,
+          "total_cost": 1177.6090495436424,
+          "execution_time": 572.8606562175737,
+          "load_balance": 0.9416554863636467,
+          "price_efficiency": 0.0008491782561779315,
+          "algorithm": "BCBO",
+          "best_fitness": 90.90520024428578
+        },
+        {
+          "iteration": 50,
+          "total_cost": 1177.6090495436424,
+          "execution_time": 572.8606562175737,
+          "load_balance": 0.9416554863636467,
+          "price_efficiency": 0.0008491782561779315,
+          "algorithm": "BCBO",
+          "best_fitness": 90.90520024428578
+        },
+        {
+          "iteration": 51,
+          "total_cost": 1177.6090495436424,
+          "execution_time": 572.8606562175737,
+          "load_balance": 0.9416554863636467,
+          "price_efficiency": 0.0008491782561779315,
+          "algorithm": "BCBO",
+          "best_fitness": 90.90520024428578
+        },
+        {
+          "iteration": 52,
+          "total_cost": 1177.6090495436424,
+          "execution_time": 572.8606562175737,
+          "load_balance": 0.9416554863636467,
+          "price_efficiency": 0.0008491782561779315,
+          "algorithm": "BCBO",
+          "best_fitness": 90.90520024428578
+        },
+        {
+          "iteration": 53,
+          "total_cost": 1177.6090495436424,
+          "execution_time": 572.8606562175737,
+          "load_balance": 0.9416554863636467,
+          "price_efficiency": 0.0008491782561779315,
+          "algorithm": "BCBO",
+          "best_fitness": 90.90520024428578
+        },
+        {
+          "iteration": 54,
+          "total_cost": 1177.6090495436424,
+          "execution_time": 572.8606562175737,
+          "load_balance": 0.9416554863636467,
+          "price_efficiency": 0.0008491782561779315,
+          "algorithm": "BCBO",
+          "best_fitness": 90.90520024428578
+        },
+        {
+          "iteration": 55,
+          "total_cost": 1177.6090495436424,
+          "execution_time": 572.8606562175737,
+          "load_balance": 0.9416554863636467,
+          "price_efficiency": 0.0008491782561779315,
+          "algorithm": "BCBO",
+          "best_fitness": 90.90520024428578
+        },
+        {
+          "iteration": 56,
+          "total_cost": 1177.6090495436424,
+          "execution_time": 572.8606562175737,
+          "load_balance": 0.9416554863636467,
+          "price_efficiency": 0.0008491782561779315,
+          "algorithm": "BCBO",
+          "best_fitness": 90.90520024428578
+        },
+        {
+          "iteration": 57,
+          "total_cost": 1177.6090495436424,
+          "execution_time": 572.8606562175737,
+          "load_balance": 0.9416554863636467,
+          "price_efficiency": 0.0008491782561779315,
+          "algorithm": "BCBO",
+          "best_fitness": 90.90520024428578
+        },
+        {
+          "iteration": 58,
+          "total_cost": 1177.6090495436424,
+          "execution_time": 572.8606562175737,
+          "load_balance": 0.9416554863636467,
+          "price_efficiency": 0.0008491782561779315,
+          "algorithm": "BCBO",
+          "best_fitness": 90.90520024428578
+        },
+        {
+          "iteration": 59,
+          "total_cost": 1177.6090495436424,
+          "execution_time": 572.8606562175737,
+          "load_balance": 0.9416554863636467,
+          "price_efficiency": 0.0008491782561779315,
+          "algorithm": "BCBO",
+          "best_fitness": 90.90520024428578
+        },
+        {
+          "iteration": 60,
+          "total_cost": 1177.6090495436424,
+          "execution_time": 572.8606562175737,
+          "load_balance": 0.9416554863636467,
+          "price_efficiency": 0.0008491782561779315,
+          "algorithm": "BCBO",
+          "best_fitness": 90.90520024428578
+        },
+        {
+          "iteration": 61,
+          "total_cost": 1177.6090495436424,
+          "execution_time": 572.8606562175737,
+          "load_balance": 0.9416554863636467,
+          "price_efficiency": 0.0008491782561779315,
+          "algorithm": "BCBO",
+          "best_fitness": 90.90520024428578
+        },
+        {
+          "iteration": 62,
+          "total_cost": 1177.6090495436424,
+          "execution_time": 572.8606562175737,
+          "load_balance": 0.9416554863636467,
+          "price_efficiency": 0.0008491782561779315,
+          "algorithm": "BCBO",
+          "best_fitness": 90.90520024428578
+        },
+        {
+          "iteration": 63,
+          "total_cost": 1177.6090495436424,
+          "execution_time": 572.8606562175737,
+          "load_balance": 0.9416554863636467,
+          "price_efficiency": 0.0008491782561779315,
+          "algorithm": "BCBO",
+          "best_fitness": 90.90520024428578
+        },
+        {
+          "iteration": 64,
+          "total_cost": 1177.6090495436424,
+          "execution_time": 572.8606562175737,
+          "load_balance": 0.9416554863636467,
+          "price_efficiency": 0.0008491782561779315,
+          "algorithm": "BCBO",
+          "best_fitness": 90.90520024428578
+        },
+        {
+          "iteration": 65,
+          "total_cost": 1177.6090495436424,
+          "execution_time": 572.8606562175737,
+          "load_balance": 0.9416554863636467,
+          "price_efficiency": 0.0008491782561779315,
+          "algorithm": "BCBO",
+          "best_fitness": 90.90520024428578
+        },
+        {
+          "iteration": 66,
+          "total_cost": 1177.6090495436424,
+          "execution_time": 572.8606562175737,
+          "load_balance": 0.9416554863636467,
+          "price_efficiency": 0.0008491782561779315,
+          "algorithm": "BCBO",
+          "best_fitness": 90.90520024428578
+        },
+        {
+          "iteration": 67,
+          "total_cost": 1177.6090495436424,
+          "execution_time": 572.8606562175737,
+          "load_balance": 0.9416554863636467,
+          "price_efficiency": 0.0008491782561779315,
+          "algorithm": "BCBO",
+          "best_fitness": 90.90520024428578
+        },
+        {
+          "iteration": 68,
+          "total_cost": 1177.6090495436424,
+          "execution_time": 572.8606562175737,
+          "load_balance": 0.9416554863636467,
+          "price_efficiency": 0.0008491782561779315,
+          "algorithm": "BCBO",
+          "best_fitness": 90.90520024428578
+        },
+        {
+          "iteration": 69,
+          "total_cost": 1177.6090495436424,
+          "execution_time": 572.8606562175737,
+          "load_balance": 0.9416554863636467,
+          "price_efficiency": 0.0008491782561779315,
+          "algorithm": "BCBO",
+          "best_fitness": 90.90520024428578
+        },
+        {
+          "iteration": 70,
+          "total_cost": 1177.6090495436424,
+          "execution_time": 572.8606562175737,
+          "load_balance": 0.9416554863636467,
+          "price_efficiency": 0.0008491782561779315,
+          "algorithm": "BCBO",
+          "best_fitness": 90.90520024428578
+        },
+        {
+          "iteration": 71,
+          "total_cost": 1177.6090495436424,
+          "execution_time": 572.8606562175737,
+          "load_balance": 0.9416554863636467,
+          "price_efficiency": 0.0008491782561779315,
+          "algorithm": "BCBO",
+          "best_fitness": 90.90520024428578
+        },
+        {
+          "iteration": 72,
+          "total_cost": 1177.6090495436424,
+          "execution_time": 572.8606562175737,
+          "load_balance": 0.9416554863636467,
+          "price_efficiency": 0.0008491782561779315,
+          "algorithm": "BCBO",
+          "best_fitness": 90.90520024428578
+        },
+        {
+          "iteration": 73,
+          "total_cost": 1177.6090495436424,
+          "execution_time": 572.8606562175737,
+          "load_balance": 0.9416554863636467,
+          "price_efficiency": 0.0008491782561779315,
+          "algorithm": "BCBO",
+          "best_fitness": 90.90520024428578
+        },
+        {
+          "iteration": 74,
+          "total_cost": 1177.6090495436424,
+          "execution_time": 572.8606562175737,
+          "load_balance": 0.9416554863636467,
+          "price_efficiency": 0.0008491782561779315,
+          "algorithm": "BCBO",
+          "best_fitness": 90.90520024428578
+        },
+        {
+          "iteration": 75,
+          "total_cost": 1177.6090495436424,
+          "execution_time": 572.8606562175737,
+          "load_balance": 0.9416554863636467,
+          "price_efficiency": 0.0008491782561779315,
+          "algorithm": "BCBO",
+          "best_fitness": 90.90520024428578
+        },
+        {
+          "iteration": 76,
+          "total_cost": 1177.6090495436424,
+          "execution_time": 572.8606562175737,
+          "load_balance": 0.9416554863636467,
+          "price_efficiency": 0.0008491782561779315,
+          "algorithm": "BCBO",
+          "best_fitness": 90.90520024428578
+        },
+        {
+          "iteration": 77,
+          "total_cost": 1177.6090495436424,
+          "execution_time": 572.8606562175737,
+          "load_balance": 0.9416554863636467,
+          "price_efficiency": 0.0008491782561779315,
+          "algorithm": "BCBO",
+          "best_fitness": 90.90520024428578
+        },
+        {
+          "iteration": 78,
+          "total_cost": 1177.6090495436424,
+          "execution_time": 572.8606562175737,
+          "load_balance": 0.9416554863636467,
+          "price_efficiency": 0.0008491782561779315,
+          "algorithm": "BCBO",
+          "best_fitness": 90.90520024428578
+        },
+        {
+          "iteration": 79,
+          "total_cost": 1177.6090495436424,
+          "execution_time": 572.8606562175737,
+          "load_balance": 0.9416554863636467,
+          "price_efficiency": 0.0008491782561779315,
+          "algorithm": "BCBO",
+          "best_fitness": 90.90520024428578
+        },
+        {
+          "iteration": 80,
+          "total_cost": 1177.6090495436424,
+          "execution_time": 572.8606562175737,
+          "load_balance": 0.9416554863636467,
+          "price_efficiency": 0.0008491782561779315,
+          "algorithm": "BCBO",
+          "best_fitness": 90.90520024428578
+        },
+        {
+          "iteration": 81,
+          "total_cost": 1177.6090495436424,
+          "execution_time": 572.8606562175737,
+          "load_balance": 0.9416554863636467,
+          "price_efficiency": 0.0008491782561779315,
+          "algorithm": "BCBO",
+          "best_fitness": 90.90520024428578
+        },
+        {
+          "iteration": 82,
+          "total_cost": 1177.6090495436424,
+          "execution_time": 572.8606562175737,
+          "load_balance": 0.9416554863636467,
+          "price_efficiency": 0.0008491782561779315,
+          "algorithm": "BCBO",
+          "best_fitness": 90.90520024428578
+        },
+        {
+          "iteration": 83,
+          "total_cost": 1177.6090495436424,
+          "execution_time": 572.8606562175737,
+          "load_balance": 0.9416554863636467,
+          "price_efficiency": 0.0008491782561779315,
+          "algorithm": "BCBO",
+          "best_fitness": 90.90520024428578
+        },
+        {
+          "iteration": 84,
+          "total_cost": 1177.6090495436424,
+          "execution_time": 572.8606562175737,
+          "load_balance": 0.9416554863636467,
+          "price_efficiency": 0.0008491782561779315,
+          "algorithm": "BCBO",
+          "best_fitness": 90.90520024428578
+        },
+        {
+          "iteration": 85,
+          "total_cost": 1177.6090495436424,
+          "execution_time": 572.8606562175737,
+          "load_balance": 0.9416554863636467,
+          "price_efficiency": 0.0008491782561779315,
+          "algorithm": "BCBO",
+          "best_fitness": 90.90520024428578
+        },
+        {
+          "iteration": 86,
+          "total_cost": 1177.6090495436424,
+          "execution_time": 572.8606562175737,
+          "load_balance": 0.9416554863636467,
+          "price_efficiency": 0.0008491782561779315,
+          "algorithm": "BCBO",
+          "best_fitness": 90.90520024428578
+        },
+        {
+          "iteration": 87,
+          "total_cost": 1150.268064787479,
+          "execution_time": 599.4029348595327,
+          "load_balance": 0.9452263541756472,
+          "price_efficiency": 0.000869362568381306,
+          "algorithm": "BCBO",
+          "best_fitness": 91.15830328540684
+        },
+        {
+          "iteration": 88,
+          "total_cost": 1160.482944484193,
+          "execution_time": 583.4884402053203,
+          "load_balance": 0.9390307401266925,
+          "price_efficiency": 0.0008617102077125018,
+          "algorithm": "BCBO",
+          "best_fitness": 91.58034612272621
+        },
+        {
+          "iteration": 89,
+          "total_cost": 1152.2326299002382,
+          "execution_time": 581.546321991386,
+          "load_balance": 0.9564451717561177,
+          "price_efficiency": 0.0008678802988062409,
+          "algorithm": "BCBO",
+          "best_fitness": 91.72517983134414
+        },
+        {
+          "iteration": 90,
+          "total_cost": 1152.2326299002382,
+          "execution_time": 581.546321991386,
+          "load_balance": 0.9564451717561177,
+          "price_efficiency": 0.0008678802988062409,
+          "algorithm": "BCBO",
+          "best_fitness": 91.72517983134414
+        },
+        {
+          "iteration": 91,
+          "total_cost": 1160.1850676273148,
+          "execution_time": 578.2398937577486,
+          "load_balance": 0.940408314700849,
+          "price_efficiency": 0.0008619314513185043,
+          "algorithm": "BCBO",
+          "best_fitness": 91.7424940148507
+        },
+        {
+          "iteration": 92,
+          "total_cost": 1161.5830526595175,
+          "execution_time": 577.9395608521048,
+          "load_balance": 0.9501248015005154,
+          "price_efficiency": 0.0008608941021044882,
+          "algorithm": "BCBO",
+          "best_fitness": 91.80006003161319
+        },
+        {
+          "iteration": 93,
+          "total_cost": 1162.772857731442,
+          "execution_time": 569.7816499592276,
+          "load_balance": 0.9669122497533774,
+          "price_efficiency": 0.0008600131938846393,
+          "algorithm": "BCBO",
+          "best_fitness": 92.1298449142454
+        },
+        {
+          "iteration": 94,
+          "total_cost": 1164.3172076594576,
+          "execution_time": 569.7816499592276,
+          "load_balance": 0.9699280670000889,
+          "price_efficiency": 0.0008588724726926908,
+          "algorithm": "BCBO",
+          "best_fitness": 92.14479322217277
+        },
+        {
+          "iteration": 95,
+          "total_cost": 1164.613595385188,
+          "execution_time": 569.7816499592276,
+          "load_balance": 0.9703725734279063,
+          "price_efficiency": 0.0008586538943937047,
+          "algorithm": "BCBO",
+          "best_fitness": 92.14701522703044
+        },
+        {
+          "iteration": 96,
+          "total_cost": 1164.613595385188,
+          "execution_time": 569.7816499592276,
+          "load_balance": 0.9703725734279063,
+          "price_efficiency": 0.0008586538943937047,
+          "algorithm": "BCBO",
+          "best_fitness": 92.14701522703044
+        },
+        {
+          "iteration": 97,
+          "total_cost": 1164.613595385188,
+          "execution_time": 569.7816499592276,
+          "load_balance": 0.9703725734279063,
+          "price_efficiency": 0.0008586538943937047,
+          "algorithm": "BCBO",
+          "best_fitness": 92.14701522703044
+        },
+        {
+          "iteration": 98,
+          "total_cost": 1159.8834591253412,
+          "execution_time": 567.1169579201612,
+          "load_balance": 0.9695218160440295,
+          "price_efficiency": 0.0008621555823306044,
+          "algorithm": "BCBO",
+          "best_fitness": 92.2257749040295
+        },
+        {
+          "iteration": 99,
+          "total_cost": 1159.8834591253412,
+          "execution_time": 567.1169579201612,
+          "load_balance": 0.9695218160440295,
+          "price_efficiency": 0.0008621555823306044,
+          "algorithm": "BCBO",
+          "best_fitness": 92.2257749040295
+        },
+        {
+          "iteration": 100,
+          "total_cost": 1159.8834591253412,
+          "execution_time": 567.1169579201612,
+          "load_balance": 0.9695218160440295,
+          "price_efficiency": 0.0008621555823306044,
+          "algorithm": "BCBO",
+          "best_fitness": 92.2257749040295
+        },
+        {
+          "iteration": 101,
+          "total_cost": 1159.8834591253412,
+          "execution_time": 567.1169579201612,
+          "load_balance": 0.9695218160440295,
+          "price_efficiency": 0.0008621555823306044,
+          "algorithm": "BCBO",
+          "best_fitness": 92.2257749040295
+        }
+      ]
+    },
+    "BCBO-GA": {
+      "algorithm": "BCBO-GA",
+      "results": [
+        {
+          "iteration": 1,
+          "total_cost": 1193.9310896898,
+          "execution_time": 870.6886257059526,
+          "load_balance": 0.6788954138797001,
+          "price_efficiency": 0.0008375692766508364,
+          "algorithm": "BCBO-GA",
+          "best_fitness": 83.54078252499849
+        },
+        {
+          "iteration": 2,
+          "total_cost": 1231.8736459596466,
+          "execution_time": 894.9269558020546,
+          "load_balance": 0.6690161639969404,
+          "price_efficiency": 0.0008117715664005576,
+          "algorithm": "BCBO-GA",
+          "best_fitness": 84.17585466020535
+        },
+        {
+          "iteration": 3,
+          "total_cost": 1231.8736459596466,
+          "execution_time": 894.9269558020546,
+          "load_balance": 0.6690161639969404,
+          "price_efficiency": 0.0008117715664005576,
+          "algorithm": "BCBO-GA",
+          "best_fitness": 84.17585466020535
+        },
+        {
+          "iteration": 4,
+          "total_cost": 1231.8736459596466,
+          "execution_time": 894.9269558020546,
+          "load_balance": 0.6690161639969404,
+          "price_efficiency": 0.0008117715664005576,
+          "algorithm": "BCBO-GA",
+          "best_fitness": 84.17585466020535
+        },
+        {
+          "iteration": 5,
+          "total_cost": 1160.7994321626816,
+          "execution_time": 802.2316705229597,
+          "load_balance": 0.7087685928149275,
+          "price_efficiency": 0.0008614752656067621,
+          "algorithm": "BCBO-GA",
+          "best_fitness": 84.68759760856939
+        },
+        {
+          "iteration": 6,
+          "total_cost": 1160.7994321626816,
+          "execution_time": 802.2316705229597,
+          "load_balance": 0.7087685928149275,
+          "price_efficiency": 0.0008614752656067621,
+          "algorithm": "BCBO-GA",
+          "best_fitness": 84.68759760856939
+        },
+        {
+          "iteration": 7,
+          "total_cost": 1160.7994321626816,
+          "execution_time": 802.2316705229597,
+          "load_balance": 0.7087685928149275,
+          "price_efficiency": 0.0008614752656067621,
+          "algorithm": "BCBO-GA",
+          "best_fitness": 84.68759760856939
+        },
+        {
+          "iteration": 8,
+          "total_cost": 1160.7994321626816,
+          "execution_time": 802.2316705229597,
+          "load_balance": 0.7087685928149275,
+          "price_efficiency": 0.0008614752656067621,
+          "algorithm": "BCBO-GA",
+          "best_fitness": 84.68759760856939
+        },
+        {
+          "iteration": 9,
+          "total_cost": 1122.6400450623587,
+          "execution_time": 810.023415941084,
+          "load_balance": 0.6736565494886206,
+          "price_efficiency": 0.000890757463630024,
+          "algorithm": "BCBO-GA",
+          "best_fitness": 84.89630598118521
+        },
+        {
+          "iteration": 10,
+          "total_cost": 1122.6400450623587,
+          "execution_time": 810.023415941084,
+          "load_balance": 0.6736565494886206,
+          "price_efficiency": 0.000890757463630024,
+          "algorithm": "BCBO-GA",
+          "best_fitness": 84.89630598118521
+        },
+        {
+          "iteration": 11,
+          "total_cost": 1122.6400450623587,
+          "execution_time": 810.023415941084,
+          "load_balance": 0.6736565494886206,
+          "price_efficiency": 0.000890757463630024,
+          "algorithm": "BCBO-GA",
+          "best_fitness": 84.89630598118521
+        },
+        {
+          "iteration": 12,
+          "total_cost": 1122.6400450623587,
+          "execution_time": 810.023415941084,
+          "load_balance": 0.6736565494886206,
+          "price_efficiency": 0.000890757463630024,
+          "algorithm": "BCBO-GA",
+          "best_fitness": 84.89630598118521
+        },
+        {
+          "iteration": 13,
+          "total_cost": 1157.7248218475943,
+          "execution_time": 755.183145940924,
+          "load_balance": 0.7023725334304163,
+          "price_efficiency": 0.0008637631156083817,
+          "algorithm": "BCBO-GA",
+          "best_fitness": 86.0123799611203
+        },
+        {
+          "iteration": 14,
+          "total_cost": 1157.7248218475943,
+          "execution_time": 755.183145940924,
+          "load_balance": 0.7023725334304163,
+          "price_efficiency": 0.0008637631156083817,
+          "algorithm": "BCBO-GA",
+          "best_fitness": 86.0123799611203
+        },
+        {
+          "iteration": 15,
+          "total_cost": 1156.464698155225,
+          "execution_time": 725.3346287530032,
+          "load_balance": 0.7636530514144279,
+          "price_efficiency": 0.0008647043015930192,
+          "algorithm": "BCBO-GA",
+          "best_fitness": 86.35979489022313
+        },
+        {
+          "iteration": 16,
+          "total_cost": 1156.464698155225,
+          "execution_time": 725.3346287530032,
+          "load_balance": 0.7636530514144279,
+          "price_efficiency": 0.0008647043015930192,
+          "algorithm": "BCBO-GA",
+          "best_fitness": 86.35979489022313
+        },
+        {
+          "iteration": 17,
+          "total_cost": 1192.7533593268854,
+          "execution_time": 722.2013708787271,
+          "load_balance": 0.8120123513975055,
+          "price_efficiency": 0.000838396296553665,
+          "algorithm": "BCBO-GA",
+          "best_fitness": 86.6558952568858
+        },
+        {
+          "iteration": 18,
+          "total_cost": 1192.7533593268854,
+          "execution_time": 722.2013708787271,
+          "load_balance": 0.8120123513975055,
+          "price_efficiency": 0.000838396296553665,
+          "algorithm": "BCBO-GA",
+          "best_fitness": 86.6558952568858
+        },
+        {
+          "iteration": 19,
+          "total_cost": 1170.0529894353301,
+          "execution_time": 701.5908820973847,
+          "load_balance": 0.7689137123410923,
+          "price_efficiency": 0.0008546621462229157,
+          "algorithm": "BCBO-GA",
+          "best_fitness": 86.85307598570583
+        },
+        {
+          "iteration": 20,
+          "total_cost": 1226.4806409289313,
+          "execution_time": 683.8079466118355,
+          "load_balance": 0.7888559718309005,
+          "price_efficiency": 0.0008153410382631585,
+          "algorithm": "BCBO-GA",
+          "best_fitness": 87.30702237988562
+        },
+        {
+          "iteration": 21,
+          "total_cost": 1226.4806409289313,
+          "execution_time": 683.8079466118355,
+          "load_balance": 0.7888559718309005,
+          "price_efficiency": 0.0008153410382631585,
+          "algorithm": "BCBO-GA",
+          "best_fitness": 87.30702237988562
+        },
+        {
+          "iteration": 22,
+          "total_cost": 1226.4806409289313,
+          "execution_time": 683.8079466118355,
+          "load_balance": 0.7888559718309005,
+          "price_efficiency": 0.0008153410382631585,
+          "algorithm": "BCBO-GA",
+          "best_fitness": 87.30702237988562
+        },
+        {
+          "iteration": 23,
+          "total_cost": 1226.4806409289313,
+          "execution_time": 683.8079466118355,
+          "load_balance": 0.7888559718309005,
+          "price_efficiency": 0.0008153410382631585,
+          "algorithm": "BCBO-GA",
+          "best_fitness": 87.30702237988562
+        },
+        {
+          "iteration": 24,
+          "total_cost": 1160.0538661456349,
+          "execution_time": 675.8247932700805,
+          "load_balance": 0.7753979377967473,
+          "price_efficiency": 0.0008620289353118965,
+          "algorithm": "BCBO-GA",
+          "best_fitness": 87.4265376404684
+        },
+        {
+          "iteration": 25,
+          "total_cost": 1160.0538661456349,
+          "execution_time": 675.8247932700805,
+          "load_balance": 0.7753979377967473,
+          "price_efficiency": 0.0008620289353118965,
+          "algorithm": "BCBO-GA",
+          "best_fitness": 87.4265376404684
+        },
+        {
+          "iteration": 26,
+          "total_cost": 1160.0538661456349,
+          "execution_time": 675.8247932700805,
+          "load_balance": 0.7753979377967473,
+          "price_efficiency": 0.0008620289353118965,
+          "algorithm": "BCBO-GA",
+          "best_fitness": 87.4265376404684
+        },
+        {
+          "iteration": 27,
+          "total_cost": 1158.4549018478622,
+          "execution_time": 643.2510799477836,
+          "load_balance": 0.8348678712254766,
+          "price_efficiency": 0.0008632187558977668,
+          "algorithm": "BCBO-GA",
+          "best_fitness": 88.47027069953292
+        },
+        {
+          "iteration": 28,
+          "total_cost": 1158.4549018478622,
+          "execution_time": 643.2510799477836,
+          "load_balance": 0.8348678712254766,
+          "price_efficiency": 0.0008632187558977668,
+          "algorithm": "BCBO-GA",
+          "best_fitness": 88.47027069953292
+        },
+        {
+          "iteration": 29,
+          "total_cost": 1158.4549018478622,
+          "execution_time": 643.2510799477836,
+          "load_balance": 0.8348678712254766,
+          "price_efficiency": 0.0008632187558977668,
+          "algorithm": "BCBO-GA",
+          "best_fitness": 88.47027069953292
+        },
+        {
+          "iteration": 30,
+          "total_cost": 1158.4549018478622,
+          "execution_time": 643.2510799477836,
+          "load_balance": 0.8348678712254766,
+          "price_efficiency": 0.0008632187558977668,
+          "algorithm": "BCBO-GA",
+          "best_fitness": 88.47027069953292
+        },
+        {
+          "iteration": 31,
+          "total_cost": 1158.4549018478622,
+          "execution_time": 643.2510799477836,
+          "load_balance": 0.8348678712254766,
+          "price_efficiency": 0.0008632187558977668,
+          "algorithm": "BCBO-GA",
+          "best_fitness": 88.47027069953292
+        },
+        {
+          "iteration": 32,
+          "total_cost": 1158.4549018478622,
+          "execution_time": 643.2510799477836,
+          "load_balance": 0.8348678712254766,
+          "price_efficiency": 0.0008632187558977668,
+          "algorithm": "BCBO-GA",
+          "best_fitness": 88.47027069953292
+        },
+        {
+          "iteration": 33,
+          "total_cost": 1137.168088926686,
+          "execution_time": 628.2354836910952,
+          "load_balance": 0.7862498654262375,
+          "price_efficiency": 0.0008793774718603566,
+          "algorithm": "BCBO-GA",
+          "best_fitness": 88.60293534571224
+        },
+        {
+          "iteration": 34,
+          "total_cost": 1148.1894486824206,
+          "execution_time": 608.9149071605294,
+          "load_balance": 0.8349881389088639,
+          "price_efficiency": 0.0008709364123460562,
+          "algorithm": "BCBO-GA",
+          "best_fitness": 89.346356782855
+        },
+        {
+          "iteration": 35,
+          "total_cost": 1148.1894486824206,
+          "execution_time": 608.9149071605294,
+          "load_balance": 0.8349881389088639,
+          "price_efficiency": 0.0008709364123460562,
+          "algorithm": "BCBO-GA",
+          "best_fitness": 89.346356782855
+        },
+        {
+          "iteration": 36,
+          "total_cost": 1154.7347861342917,
+          "execution_time": 608.9149071605294,
+          "load_balance": 0.8891890819675995,
+          "price_efficiency": 0.0008659997179800069,
+          "algorithm": "BCBO-GA",
+          "best_fitness": 89.61669712818762
+        },
+        {
+          "iteration": 37,
+          "total_cost": 1174.7077830486398,
+          "execution_time": 608.9149071605294,
+          "load_balance": 0.9019318286088426,
+          "price_efficiency": 0.0008512755372689298,
+          "algorithm": "BCBO-GA",
+          "best_fitness": 89.67641701212098
+        },
+        {
+          "iteration": 38,
+          "total_cost": 1174.7077830486398,
+          "execution_time": 608.9149071605294,
+          "load_balance": 0.9019318286088426,
+          "price_efficiency": 0.0008512755372689298,
+          "algorithm": "BCBO-GA",
+          "best_fitness": 89.67641701212098
+        },
+        {
+          "iteration": 39,
+          "total_cost": 1174.7077830486398,
+          "execution_time": 608.9149071605294,
+          "load_balance": 0.9019318286088426,
+          "price_efficiency": 0.0008512755372689298,
+          "algorithm": "BCBO-GA",
+          "best_fitness": 89.67641701212098
+        },
+        {
+          "iteration": 40,
+          "total_cost": 1174.9796937981846,
+          "execution_time": 608.9149071605294,
+          "load_balance": 0.9029457075314256,
+          "price_efficiency": 0.00085107853729486,
+          "algorithm": "BCBO-GA",
+          "best_fitness": 89.680928389421
+        },
+        {
+          "iteration": 41,
+          "total_cost": 1174.9796937981846,
+          "execution_time": 608.9149071605294,
+          "load_balance": 0.9029457075314256,
+          "price_efficiency": 0.00085107853729486,
+          "algorithm": "BCBO-GA",
+          "best_fitness": 89.680928389421
+        },
+        {
+          "iteration": 42,
+          "total_cost": 1174.9796937981846,
+          "execution_time": 608.9149071605294,
+          "load_balance": 0.9029457075314256,
+          "price_efficiency": 0.00085107853729486,
+          "algorithm": "BCBO-GA",
+          "best_fitness": 89.680928389421
+        },
+        {
+          "iteration": 43,
+          "total_cost": 1174.9796937981846,
+          "execution_time": 608.9149071605294,
+          "load_balance": 0.9029457075314256,
+          "price_efficiency": 0.00085107853729486,
+          "algorithm": "BCBO-GA",
+          "best_fitness": 89.680928389421
+        },
+        {
+          "iteration": 44,
+          "total_cost": 1174.9796937981846,
+          "execution_time": 608.9149071605294,
+          "load_balance": 0.9029457075314256,
+          "price_efficiency": 0.00085107853729486,
+          "algorithm": "BCBO-GA",
+          "best_fitness": 89.680928389421
+        },
+        {
+          "iteration": 45,
+          "total_cost": 1174.9796937981846,
+          "execution_time": 608.9149071605294,
+          "load_balance": 0.9029457075314256,
+          "price_efficiency": 0.00085107853729486,
+          "algorithm": "BCBO-GA",
+          "best_fitness": 89.680928389421
+        },
+        {
+          "iteration": 46,
+          "total_cost": 1174.9796937981846,
+          "execution_time": 608.9149071605294,
+          "load_balance": 0.9029457075314256,
+          "price_efficiency": 0.00085107853729486,
+          "algorithm": "BCBO-GA",
+          "best_fitness": 89.680928389421
+        },
+        {
+          "iteration": 47,
+          "total_cost": 1174.9796937981846,
+          "execution_time": 608.9149071605294,
+          "load_balance": 0.9029457075314256,
+          "price_efficiency": 0.00085107853729486,
+          "algorithm": "BCBO-GA",
+          "best_fitness": 89.680928389421
+        },
+        {
+          "iteration": 48,
+          "total_cost": 1174.9796937981846,
+          "execution_time": 608.9149071605294,
+          "load_balance": 0.9029457075314256,
+          "price_efficiency": 0.00085107853729486,
+          "algorithm": "BCBO-GA",
+          "best_fitness": 89.680928389421
+        },
+        {
+          "iteration": 49,
+          "total_cost": 1174.9796937981846,
+          "execution_time": 608.9149071605294,
+          "load_balance": 0.9029457075314256,
+          "price_efficiency": 0.00085107853729486,
+          "algorithm": "BCBO-GA",
+          "best_fitness": 89.680928389421
+        },
+        {
+          "iteration": 50,
+          "total_cost": 1177.8011965768485,
+          "execution_time": 594.5350299194722,
+          "load_balance": 0.9090634302271172,
+          "price_efficiency": 0.0008490397208436804,
+          "algorithm": "BCBO-GA",
+          "best_fitness": 90.10715783555443
+        },
+        {
+          "iteration": 51,
+          "total_cost": 1178.8559385541146,
+          "execution_time": 594.5350299194722,
+          "load_balance": 0.917982903587775,
+          "price_efficiency": 0.0008482800709120027,
+          "algorithm": "BCBO-GA",
+          "best_fitness": 90.15222662917853
+        },
+        {
+          "iteration": 52,
+          "total_cost": 1177.7502678877527,
+          "execution_time": 594.5350299194722,
+          "load_balance": 0.9269206264810018,
+          "price_efficiency": 0.0008490764353162771,
+          "algorithm": "BCBO-GA",
+          "best_fitness": 90.19725043249169
+        },
+        {
+          "iteration": 53,
+          "total_cost": 1173.9554482268234,
+          "execution_time": 594.5350299194722,
+          "load_balance": 0.931682795020218,
+          "price_efficiency": 0.0008518210811650545,
+          "algorithm": "BCBO-GA",
+          "best_fitness": 90.22170301274586
+        },
+        {
+          "iteration": 54,
+          "total_cost": 1173.1592910249012,
+          "execution_time": 594.5350299194722,
+          "load_balance": 0.9334447976839274,
+          "price_efficiency": 0.0008523991642038446,
+          "algorithm": "BCBO-GA",
+          "best_fitness": 90.23064251775726
+        },
+        {
+          "iteration": 55,
+          "total_cost": 1173.1592910249012,
+          "execution_time": 594.5350299194722,
+          "load_balance": 0.9334447976839274,
+          "price_efficiency": 0.0008523991642038446,
+          "algorithm": "BCBO-GA",
+          "best_fitness": 90.23064251775726
+        },
+        {
+          "iteration": 56,
+          "total_cost": 1171.95654084947,
+          "execution_time": 594.5350299194722,
+          "load_balance": 0.9346176787634318,
+          "price_efficiency": 0.0008532739605018931,
+          "algorithm": "BCBO-GA",
+          "best_fitness": 90.23622587916213
+        },
+        {
+          "iteration": 57,
+          "total_cost": 1168.2029899389652,
+          "execution_time": 594.5350299194722,
+          "load_balance": 0.9350635397902985,
+          "price_efficiency": 0.0008560156135161331,
+          "algorithm": "BCBO-GA",
+          "best_fitness": 90.2395340132636
+        },
+        {
+          "iteration": 58,
+          "total_cost": 1167.7884642440285,
+          "execution_time": 594.5350299194722,
+          "load_balance": 0.9356780210379794,
+          "price_efficiency": 0.0008563194703169409,
+          "algorithm": "BCBO-GA",
+          "best_fitness": 90.24267191219896
+        },
+        {
+          "iteration": 59,
+          "total_cost": 1167.7884642440285,
+          "execution_time": 594.5350299194722,
+          "load_balance": 0.9356780210379794,
+          "price_efficiency": 0.0008563194703169409,
+          "algorithm": "BCBO-GA",
+          "best_fitness": 90.24267191219896
+        },
+        {
+          "iteration": 60,
+          "total_cost": 1167.7884642440285,
+          "execution_time": 594.5350299194722,
+          "load_balance": 0.9356780210379794,
+          "price_efficiency": 0.0008563194703169409,
+          "algorithm": "BCBO-GA",
+          "best_fitness": 90.24267191219896
+        },
+        {
+          "iteration": 61,
+          "total_cost": 1173.5138654313869,
+          "execution_time": 594.5350299194722,
+          "load_balance": 0.9386324883801814,
+          "price_efficiency": 0.0008521416138361992,
+          "algorithm": "BCBO-GA",
+          "best_fitness": 90.25666896701212
+        },
+        {
+          "iteration": 62,
+          "total_cost": 1172.7950531081933,
+          "execution_time": 594.5350299194722,
+          "load_balance": 0.9388522478623038,
+          "price_efficiency": 0.0008526638959612694,
+          "algorithm": "BCBO-GA",
+          "best_fitness": 90.25786931220757
+        },
+        {
+          "iteration": 63,
+          "total_cost": 1172.7950531081933,
+          "execution_time": 594.5350299194722,
+          "load_balance": 0.9388522478623038,
+          "price_efficiency": 0.0008526638959612694,
+          "algorithm": "BCBO-GA",
+          "best_fitness": 90.25786931220757
+        },
+        {
+          "iteration": 64,
+          "total_cost": 1172.7950531081933,
+          "execution_time": 594.5350299194722,
+          "load_balance": 0.9388522478623038,
+          "price_efficiency": 0.0008526638959612694,
+          "algorithm": "BCBO-GA",
+          "best_fitness": 90.25786931220757
+        },
+        {
+          "iteration": 65,
+          "total_cost": 1163.8644176449,
+          "execution_time": 558.7796842261334,
+          "load_balance": 0.9462687055568781,
+          "price_efficiency": 0.0008592066085878893,
+          "algorithm": "BCBO-GA",
+          "best_fitness": 91.3698886808835
+        },
+        {
+          "iteration": 66,
+          "total_cost": 1170.3435241880793,
+          "execution_time": 558.7796842261334,
+          "load_balance": 0.949631650872199,
+          "price_efficiency": 0.0008544499785559078,
+          "algorithm": "BCBO-GA",
+          "best_fitness": 91.38533106231635
+        },
+        {
+          "iteration": 67,
+          "total_cost": 1170.3435241880793,
+          "execution_time": 558.7796842261334,
+          "load_balance": 0.949631650872199,
+          "price_efficiency": 0.0008544499785559078,
+          "algorithm": "BCBO-GA",
+          "best_fitness": 91.38533106231635
+        },
+        {
+          "iteration": 68,
+          "total_cost": 1118.3985759788693,
+          "execution_time": 581.659191292074,
+          "load_balance": 0.9523289094550742,
+          "price_efficiency": 0.0008941356154988148,
+          "algorithm": "BCBO-GA",
+          "best_fitness": 91.70666835345327
+        },
+        {
+          "iteration": 69,
+          "total_cost": 1118.3985759788693,
+          "execution_time": 581.659191292074,
+          "load_balance": 0.9523289094550742,
+          "price_efficiency": 0.0008941356154988148,
+          "algorithm": "BCBO-GA",
+          "best_fitness": 91.70666835345327
+        },
+        {
+          "iteration": 70,
+          "total_cost": 1118.3985759788693,
+          "execution_time": 581.659191292074,
+          "load_balance": 0.9523289094550742,
+          "price_efficiency": 0.0008941356154988148,
+          "algorithm": "BCBO-GA",
+          "best_fitness": 91.70666835345327
+        },
+        {
+          "iteration": 71,
+          "total_cost": 1118.3985759788693,
+          "execution_time": 581.659191292074,
+          "load_balance": 0.9523289094550742,
+          "price_efficiency": 0.0008941356154988148,
+          "algorithm": "BCBO-GA",
+          "best_fitness": 91.70666835345327
+        },
+        {
+          "iteration": 72,
+          "total_cost": 1118.3985759788693,
+          "execution_time": 581.659191292074,
+          "load_balance": 0.9523289094550742,
+          "price_efficiency": 0.0008941356154988148,
+          "algorithm": "BCBO-GA",
+          "best_fitness": 91.70666835345327
+        },
+        {
+          "iteration": 73,
+          "total_cost": 1118.3985759788693,
+          "execution_time": 581.659191292074,
+          "load_balance": 0.9523289094550742,
+          "price_efficiency": 0.0008941356154988148,
+          "algorithm": "BCBO-GA",
+          "best_fitness": 91.70666835345327
+        },
+        {
+          "iteration": 74,
+          "total_cost": 1118.3985759788693,
+          "execution_time": 581.659191292074,
+          "load_balance": 0.9523289094550742,
+          "price_efficiency": 0.0008941356154988148,
+          "algorithm": "BCBO-GA",
+          "best_fitness": 91.70666835345327
+        },
+        {
+          "iteration": 75,
+          "total_cost": 1118.3985759788693,
+          "execution_time": 581.659191292074,
+          "load_balance": 0.9523289094550742,
+          "price_efficiency": 0.0008941356154988148,
+          "algorithm": "BCBO-GA",
+          "best_fitness": 91.70666835345327
+        },
+        {
+          "iteration": 76,
+          "total_cost": 1118.3985759788693,
+          "execution_time": 581.659191292074,
+          "load_balance": 0.9523289094550742,
+          "price_efficiency": 0.0008941356154988148,
+          "algorithm": "BCBO-GA",
+          "best_fitness": 91.70666835345327
+        },
+        {
+          "iteration": 77,
+          "total_cost": 1118.3985759788693,
+          "execution_time": 581.659191292074,
+          "load_balance": 0.9523289094550742,
+          "price_efficiency": 0.0008941356154988148,
+          "algorithm": "BCBO-GA",
+          "best_fitness": 91.70666835345327
+        },
+        {
+          "iteration": 78,
+          "total_cost": 1118.3985759788693,
+          "execution_time": 581.659191292074,
+          "load_balance": 0.9523289094550742,
+          "price_efficiency": 0.0008941356154988148,
+          "algorithm": "BCBO-GA",
+          "best_fitness": 91.70666835345327
+        },
+        {
+          "iteration": 79,
+          "total_cost": 1170.0097964883726,
+          "execution_time": 552.0782999714222,
+          "load_balance": 0.973507896638849,
+          "price_efficiency": 0.0008546936975627658,
+          "algorithm": "BCBO-GA",
+          "best_fitness": 91.72146777019067
+        },
+        {
+          "iteration": 80,
+          "total_cost": 1121.4482271274044,
+          "execution_time": 570.8468747189281,
+          "load_balance": 0.9614451093192848,
+          "price_efficiency": 0.0008917041151955816,
+          "algorithm": "BCBO-GA",
+          "best_fitness": 92.0764704671816
+        },
+        {
+          "iteration": 81,
+          "total_cost": 1121.4482271274044,
+          "execution_time": 570.8468747189281,
+          "load_balance": 0.9614451093192848,
+          "price_efficiency": 0.0008917041151955816,
+          "algorithm": "BCBO-GA",
+          "best_fitness": 92.0764704671816
+        },
+        {
+          "iteration": 82,
+          "total_cost": 1121.4482271274044,
+          "execution_time": 570.8468747189281,
+          "load_balance": 0.9614451093192848,
+          "price_efficiency": 0.0008917041151955816,
+          "algorithm": "BCBO-GA",
+          "best_fitness": 92.0764704671816
+        },
+        {
+          "iteration": 83,
+          "total_cost": 1121.4482271274044,
+          "execution_time": 570.8468747189281,
+          "load_balance": 0.9614451093192848,
+          "price_efficiency": 0.0008917041151955816,
+          "algorithm": "BCBO-GA",
+          "best_fitness": 92.0764704671816
+        },
+        {
+          "iteration": 84,
+          "total_cost": 1121.4482271274044,
+          "execution_time": 570.8468747189281,
+          "load_balance": 0.9614451093192848,
+          "price_efficiency": 0.0008917041151955816,
+          "algorithm": "BCBO-GA",
+          "best_fitness": 92.0764704671816
+        },
+        {
+          "iteration": 85,
+          "total_cost": 1121.4482271274044,
+          "execution_time": 570.8468747189281,
+          "load_balance": 0.9614451093192848,
+          "price_efficiency": 0.0008917041151955816,
+          "algorithm": "BCBO-GA",
+          "best_fitness": 92.0764704671816
+        },
+        {
+          "iteration": 86,
+          "total_cost": 1121.4482271274044,
+          "execution_time": 570.8468747189281,
+          "load_balance": 0.9614451093192848,
+          "price_efficiency": 0.0008917041151955816,
+          "algorithm": "BCBO-GA",
+          "best_fitness": 92.0764704671816
+        },
+        {
+          "iteration": 87,
+          "total_cost": 1121.4482271274044,
+          "execution_time": 570.8468747189281,
+          "load_balance": 0.9614451093192848,
+          "price_efficiency": 0.0008917041151955816,
+          "algorithm": "BCBO-GA",
+          "best_fitness": 92.0764704671816
+        },
+        {
+          "iteration": 88,
+          "total_cost": 1121.4482271274044,
+          "execution_time": 570.8468747189281,
+          "load_balance": 0.9614451093192848,
+          "price_efficiency": 0.0008917041151955816,
+          "algorithm": "BCBO-GA",
+          "best_fitness": 92.0764704671816
+        },
+        {
+          "iteration": 89,
+          "total_cost": 1121.4482271274044,
+          "execution_time": 570.8468747189281,
+          "load_balance": 0.9614451093192848,
+          "price_efficiency": 0.0008917041151955816,
+          "algorithm": "BCBO-GA",
+          "best_fitness": 92.0764704671816
+        },
+        {
+          "iteration": 90,
+          "total_cost": 1121.4482271274044,
+          "execution_time": 570.8468747189281,
+          "load_balance": 0.9614451093192848,
+          "price_efficiency": 0.0008917041151955816,
+          "algorithm": "BCBO-GA",
+          "best_fitness": 92.0764704671816
+        },
+        {
+          "iteration": 91,
+          "total_cost": 1121.4482271274044,
+          "execution_time": 570.8468747189281,
+          "load_balance": 0.9614451093192848,
+          "price_efficiency": 0.0008917041151955816,
+          "algorithm": "BCBO-GA",
+          "best_fitness": 92.0764704671816
+        },
+        {
+          "iteration": 92,
+          "total_cost": 1125.8806917232307,
+          "execution_time": 565.0030992643616,
+          "load_balance": 0.9648802028488616,
+          "price_efficiency": 0.0008881935772264146,
+          "algorithm": "BCBO-GA",
+          "best_fitness": 92.27366011740855
+        },
+        {
+          "iteration": 93,
+          "total_cost": 1126.5814810853578,
+          "execution_time": 565.0030992643616,
+          "load_balance": 0.9706616784806489,
+          "price_efficiency": 0.0008876410769232161,
+          "algorithm": "BCBO-GA",
+          "best_fitness": 92.30226254760045
+        },
+        {
+          "iteration": 94,
+          "total_cost": 1126.7870175181836,
+          "execution_time": 561.8066939434664,
+          "load_balance": 0.9687941905875727,
+          "price_efficiency": 0.000887479162934519,
+          "algorithm": "BCBO-GA",
+          "best_fitness": 92.39345627491768
+        },
+        {
+          "iteration": 95,
+          "total_cost": 1127.0405791036317,
+          "execution_time": 560.5393094082485,
+          "load_balance": 0.9700350141975597,
+          "price_efficiency": 0.0008872794978757993,
+          "algorithm": "BCBO-GA",
+          "best_fitness": 92.43970558998421
+        },
+        {
+          "iteration": 96,
+          "total_cost": 1126.6682303581435,
+          "execution_time": 560.5393094082485,
+          "load_balance": 0.9732521842552124,
+          "price_efficiency": 0.0008875727318542999,
+          "algorithm": "BCBO-GA",
+          "best_fitness": 92.45536276568231
+        },
+        {
+          "iteration": 97,
+          "total_cost": 1126.6682303581435,
+          "execution_time": 560.5393094082485,
+          "load_balance": 0.9732521842552124,
+          "price_efficiency": 0.0008875727318542999,
+          "algorithm": "BCBO-GA",
+          "best_fitness": 92.45536276568231
+        },
+        {
+          "iteration": 98,
+          "total_cost": 1125.6371668967904,
+          "execution_time": 560.6570743848125,
+          "load_balance": 0.9756042337831414,
+          "price_efficiency": 0.0008883857325611069,
+          "algorithm": "BCBO-GA",
+          "best_fitness": 92.46338396060662
+        },
+        {
+          "iteration": 99,
+          "total_cost": 1126.3705814560612,
+          "execution_time": 559.0470275403594,
+          "load_balance": 0.9762601016636043,
+          "price_efficiency": 0.0008878072772634837,
+          "algorithm": "BCBO-GA",
+          "best_fitness": 92.51805291991438
+        },
+        {
+          "iteration": 100,
+          "total_cost": 1126.3705814560612,
+          "execution_time": 559.0470275403594,
+          "load_balance": 0.9762601016636043,
+          "price_efficiency": 0.0008878072772634837,
+          "algorithm": "BCBO-GA",
+          "best_fitness": 92.51805291991438
+        },
+        {
+          "iteration": 101,
+          "total_cost": 1126.3705814560612,
+          "execution_time": 559.0470275403594,
+          "load_balance": 0.9762601016636043,
+          "price_efficiency": 0.0008878072772634837,
+          "algorithm": "BCBO-GA",
+          "best_fitness": 92.51805291991438
+        }
+      ]
+    }
+  }
+}

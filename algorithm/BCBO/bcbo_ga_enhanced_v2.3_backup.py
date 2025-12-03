@@ -101,36 +101,32 @@ class BCBO_GA(BCBO_CloudScheduler):
 
     def _adaptive_parameters(self):
         """
-        混合自适应参数调整机制 (v2.4中等规模精准修复版)
+        混合自适应参数调整机制 (v2.3负载均衡增强版)
 
-        结合v2.0、v2.1、v2.3优势的四段式混合策略：
+        结合v2.0和v2.1优势的三段式混合策略，v2.3针对超大规模负载均衡问题优化：
 
-        **小规模 (M≤200)**: v2.0连续公式（已验证+0.76%性能）
+        **小规模 (M≤200)**: v2.0连续公式（已验证+0.44%性能）
         - 使用原v2.0公式，保持优秀表现
         - 参数范围: crossover[0.87-0.90], mutation[0.146-0.15]
 
-        **中规模 (200<M≤1500)**: v2.1平衡策略 + v2.4精准修复 ⭐ 新优化
-        - M=800-1200: 固定高参数 + 强化局部搜索（修复M=1000退化）
-          * crossover=0.82, mutation=0.11（提升探索能力）
-          * local_search_max_iters=35, task_reassign_num=10（强化开发）
-        - 其他范围: 使用v2.1平滑过渡公式
+        **中规模 (200<M≤1500)**: v2.1平衡策略
+        - 平滑过渡，平衡探索与利用
+        - 参数范围: crossover[0.70-0.85], mutation[0.08-0.12]
 
-        **大规模 (M>1500)**: v2.3负载均衡增强策略（已验证+0.71%性能）
+        **大规模 (M>1500)**: v2.3负载均衡增强策略 ⭐ 新优化
         - 提高参数下限，增强负载均衡优化能力
         - 参数范围: crossover[0.65-0.70], mutation[0.07-0.08]
         - 局部搜索强度提升: max_iters[35-50], reassign[10-15]
 
         版本迭代历史:
-        - v2.0: 连续公式，小规模+0.76%，超大规模-2.88%
+        - v2.0: 连续公式，小规模+0.44%，超大规模-2.88%
         - v2.2: 混合策略，综合-0.05%，超大规模改进至-0.79%
-        - v2.3: 负载均衡增强，小规模+0.76%，超大规模+0.71%，但M=1000退化-1.61%
-        - v2.4: 精准修复M=1000，预期综合改进率从-0.09%提升至+0.15~0.25%
+        - v2.3: 负载均衡增强，目标超大规模达到-0.50%
 
-        v2.4核心改进:
-        1. 精准识别M=1000性能退化问题（execution_time -1.61%）
-        2. 为M=800-1200范围设置固定高参数（避免过早收敛）
-        3. 借鉴v2.3成功经验，强化局部搜索（max_iters +37%, reassign +67%）
-        4. 不影响小规模和超大规模的优秀表现
+        v2.3改进要点:
+        1. 减缓超大规模参数衰减速度（0.60→0.65交叉率）
+        2. 提高局部搜索强度（max_iters 40→50）
+        3. 放宽负载均衡修复阈值（1.4→1.45），触发更多修复
         """
         M = self.M  # 任务数量
 
@@ -146,37 +142,21 @@ class BCBO_GA(BCBO_CloudScheduler):
             self.local_search_max_iters = 20
             self.task_reassign_num = 3
 
-        # ===== 分段2: 中规模 (200<M≤1500) - v2.1平衡策略 + v2.4优化 =====
+        # ===== 分段2: 中规模 (200<M≤1500) - v2.1平衡策略 =====
         elif M <= 1500:
             M_norm = M - 200  # 归一化到 [0, 1300]
 
-            # ===== v2.4优化: M=800-1200特殊优化区域 (修复M=1000性能退化) =====
-            # 问题诊断: v2.3在M=1000时参数过低（crossover=0.758, mutation=0.0952）
-            # 导致execution_time退化-1.61%, load_balance退化-0.74%
-            # 优化策略: 提高参数下限，增强局部搜索，借鉴v2.3超大规模成功经验
-            if 600 <= M_norm <= 1000:  # M=800-1200
-                # 固定较高的探索参数（避免过早收敛）
-                self.crossover_rate = 0.82  # 固定值（原v2.1公式: 0.758 @ M=1000）
-                self.mutation_rate = 0.11   # 固定值（原v2.1公式: 0.0952 @ M=1000）
-                self.elite_size = 3
-                self.local_search_prob = 0.40
+            # 平滑过渡参数（从M=200的0.88/0.146衔接）
+            self.crossover_rate = 0.85 - 0.000115 * M_norm  # M=200: 0.85, M=1500: 0.70
+            self.mutation_rate = 0.12 - 0.000031 * M_norm   # M=200: 0.12, M=1500: 0.08
+            self.elite_size = 2 + int(M_norm / 433)  # M=200: 2, M=1500: 5
+            self.local_search_prob = 0.35 + 0.000077 * M_norm  # M=200: 0.35, M=1500: 0.45
 
-                # 强化局部搜索（借鉴v2.3成功经验）
-                self.load_balance_threshold = 1.55  # 降低阈值，触发更多修复
-                self.local_search_max_iters = 35    # 提升37% (原v2.1公式: 26 @ M=1000)
-                self.task_reassign_num = 10         # 提升67% (原v2.1公式: 6 @ M=1000)
-            else:
-                # 其他M值使用原v2.1平滑过渡公式
-                self.crossover_rate = 0.85 - 0.000115 * M_norm  # M=200: 0.85, M=1500: 0.70
-                self.mutation_rate = 0.12 - 0.000031 * M_norm   # M=200: 0.12, M=1500: 0.08
-                self.elite_size = 2 + int(M_norm / 433)  # M=200: 2, M=1500: 5
-                self.local_search_prob = 0.35 + 0.000077 * M_norm  # M=200: 0.35, M=1500: 0.45
-
-                # 线性插值阈值
-                progress = M_norm / 1300  # [0, 1]
-                self.load_balance_threshold = 2.0 - 0.4 * progress  # 2.0 -> 1.6
-                self.local_search_max_iters = int(20 + 10 * progress)  # 20 -> 30
-                self.task_reassign_num = int(3 + 5 * progress)  # 3 -> 8
+            # 线性插值阈值
+            progress = M_norm / 1300  # [0, 1]
+            self.load_balance_threshold = 2.0 - 0.4 * progress  # 2.0 -> 1.6
+            self.local_search_max_iters = int(20 + 10 * progress)  # 20 -> 30
+            self.task_reassign_num = int(3 + 5 * progress)  # 3 -> 8
 
         # ===== 分段3: 大规模 (M>1500) - v2.3负载均衡增强策略 =====
         else:
@@ -419,17 +399,12 @@ class BCBO_GA(BCBO_CloudScheduler):
 
     def _task_reassignment_search(self, solution: List[int], num_tasks: int = None) -> List[int]:
         """
-        任务重分配搜索 (v2.6: 调整帕累托策略)
+        任务重分配搜索
 
         策略:
         1. 选择负载最高VM上的任务
         2. 尝试重新分配到其他VM
-        3. ⭐ v2.6调整: 帕累托改进策略（fitness容忍度降低到0.5%）
-
-        v2.6优化目标:
-        - 修复v2.5的过度成本优先问题
-        - 降低fitness容忍度: 1% → 0.5%
-        - 在优化性能的同时适度考虑成本
+        3. 选择最优分配
 
         参数:
             solution: 当前解
@@ -458,7 +433,6 @@ class BCBO_GA(BCBO_CloudScheduler):
         for task in tasks_to_reassign:
             best_vm = solution[task]
             best_fitness = self.comprehensive_fitness(improved_solution)
-            best_cost = self._calculate_total_cost(improved_solution)
 
             # 尝试分配到其他VM
             for new_vm in range(self.N):
@@ -469,19 +443,9 @@ class BCBO_GA(BCBO_CloudScheduler):
                 test_solution[task] = new_vm
 
                 test_fitness = self.comprehensive_fitness(test_solution)
-                test_cost = self._calculate_total_cost(test_solution)
-
-                # ⭐ v2.6优化: 调整帕累托改进策略
-                # 策略1: fitness提升 且 cost不增加（双赢）
-                if test_fitness > best_fitness and test_cost <= best_cost:
+                if test_fitness > best_fitness:
                     best_vm = new_vm
                     best_fitness = test_fitness
-                    best_cost = test_cost
-                # 策略2: cost降低 且 fitness不下降超过0.5%（降低容忍度）
-                elif test_cost < best_cost and test_fitness >= best_fitness * 0.995:
-                    best_vm = new_vm
-                    best_fitness = test_fitness
-                    best_cost = test_cost
 
             # 更新分配
             improved_solution[task] = best_vm
@@ -528,27 +492,14 @@ class BCBO_GA(BCBO_CloudScheduler):
 
     # ==================== 温和的负载均衡 ====================
 
-    def _calculate_total_cost(self, solution: List[int]) -> float:
-        """
-        计算解的总成本（v2.5新增辅助方法）
-        调用BCBO基类的calculate_cost方法
-        """
-        return self.calculate_cost(solution)
-
     def gentle_load_balance_repair(self, population: List[List[int]]) -> List[List[int]]:
         """
-        温和的负载均衡修复 (v2.6: 调整成本策略)
+        温和的负载均衡修复
 
         策略:
         1. 只修复严重不均衡的解 (不均衡度>threshold)
-        2. ⭐ v2.6优化: 性能/成本比平衡的VM选择
-        3. ⭐ v2.6优化: 同时检查fitness和cost (cost增加≤3%)
-        4. 每次只迁移1-2个任务 (避免大幅改动)
-
-        v2.6优化目标:
-        - 修复v2.5的成本-性能失衡问题
-        - 放宽成本容忍度: 1% → 3%
-        - 使用效率比选择VM而非单纯低成本
+        2. 只在修复后fitness不下降时应用
+        3. 每次只迁移1-2个任务 (避免大幅改动)
 
         参数:
             population: 当前种群
@@ -576,30 +527,9 @@ class BCBO_GA(BCBO_CloudScheduler):
                     # 尝试温和修复
                     repaired_sol = sol.copy()
 
-                    # 找最忙的VM
+                    # 找最忙和最闲的VM
                     busiest_vm = np.argmax(vm_loads)
-
-                    # ⭐ v2.6优化: 成本-性能平衡的VM选择
-                    # 计算每个VM的性能/成本比（效率）
-                    vm_costs_array = np.array([self.vm_costs[i] for i in range(self.N)])
-
-                    # 使用processing_speed作为性能指标（速度越高越好）
-                    vm_performance = np.array([self.processing_speed[i] for i in range(self.N)])
-
-                    # 计算效率比: performance / cost（值越大越好）
-                    vm_efficiency = vm_performance / (vm_costs_array + 1e-6)
-                    median_efficiency = np.median(vm_efficiency)
-
-                    # 高效率VM列表（效率≥中位数）
-                    efficient_vms = [i for i in range(self.N)
-                                    if vm_efficiency[i] >= median_efficiency and vm_loads[i] > 0]
-
-                    if efficient_vms:
-                        # 在高效率VM中选择负载最低的
-                        idlest_vm = min(efficient_vms, key=lambda i: vm_loads[i])
-                    else:
-                        # 后备方案：选择所有活跃VM中负载最低的
-                        idlest_vm = np.argmin(vm_loads[vm_loads > 0]) if np.sum(vm_loads > 0) > 1 else None
+                    idlest_vm = np.argmin(vm_loads[vm_loads > 0]) if np.sum(vm_loads > 0) > 1 else None
 
                     if idlest_vm is not None:
                         # 找busiest_vm上最轻的任务
@@ -611,14 +541,8 @@ class BCBO_GA(BCBO_CloudScheduler):
                             # 迁移到idlest_vm
                             repaired_sol[lightest_task] = idlest_vm
 
-                            # ⭐ v2.6优化: 同时检查fitness和cost (放宽至3%)
-                            old_fitness = self.comprehensive_fitness(sol)
-                            new_fitness = self.comprehensive_fitness(repaired_sol)
-                            old_cost = self._calculate_total_cost(sol)
-                            new_cost = self._calculate_total_cost(repaired_sol)
-
-                            # 接受条件: fitness不下降 且 cost增加≤3%
-                            if new_fitness >= old_fitness and new_cost <= old_cost * 1.03:
+                            # 只在fitness不下降时应用
+                            if self.comprehensive_fitness(repaired_sol) >= self.comprehensive_fitness(sol):
                                 repaired_population.append(repaired_sol)
                                 self.balance_repairs += 1
                             else:
@@ -638,29 +562,18 @@ class BCBO_GA(BCBO_CloudScheduler):
 
     def run_complete_algorithm(self) -> Dict:
         """
-        运行完整的BCBO-GA算法 (v2.6优化版)
+        运行完整的BCBO-GA算法
 
-        v2.6优化:
-        1. ⭐ 成本-性能平衡的VM选择（效率比）
-        2. ⭐ 放宽成本容忍度: 1% → 3%
-        3. ⭐ 降低fitness容忍度: 1% → 0.5%
-        4. ⭐ 延迟GA激活: 5% → 10%
-
-        阶段分配 (v2.6优化后):
-        1. Dynamic Search (10%) - 恢复BCBO原生阶段
-        2. GA Enhancement (18%) - 延迟但保持充分时间
-        3. Static Search (5%)
+        阶段分配:
+        1. Dynamic Search (10%)
+        2. Static Search (10%)
+        3. GA Enhancement (15%) - 新增
         4. Encircle Dynamic (15%)
         5. Encircle Static (15%)
-        6. Local Search Enhancement (17%) - 适度调整
+        6. Local Search Enhancement (15%) - 新增
         7. Attack Dynamic (10%)
         8. Attack Static (10%)
         9. 温和负载均衡: 每20代触发
-
-        预期改进:
-        - 修复v2.5的成本-性能失衡
-        - 执行时间: -2.79% → +0.5%
-        - 综合改进率: -0.53% → +0.2%
         """
         start_time = time.time()
 
@@ -685,21 +598,21 @@ class BCBO_GA(BCBO_CloudScheduler):
             'best_solution': self.best_solution.copy() if self.best_solution else None
         })
 
-        # ⭐ v2.6优化: 调整阶段迭代分配（延迟GA激活至10%）
+        # 阶段迭代分配
         phase_iters = {
-            'dynamic_search': int(self.iterations * 0.10),    # 5% → 10% (恢复)
-            'ga_enhancement': int(self.iterations * 0.18),    # 20% → 18% (延迟但保持)
-            'static_search': int(self.iterations * 0.05),     # 保持不变
-            'encircle_dynamic': int(self.iterations * 0.15),  # 保持不变
-            'encircle_static': int(self.iterations * 0.15),   # 保持不变
-            'local_search': int(self.iterations * 0.17),      # 20% → 17% (适度调整)
-            'attack_dynamic': int(self.iterations * 0.10),    # 保持不变
-            'attack_static': int(self.iterations * 0.10)      # 保持不变
+            'dynamic_search': int(self.iterations * 0.10),
+            'static_search': int(self.iterations * 0.10),
+            'ga_enhancement': int(self.iterations * 0.15),
+            'encircle_dynamic': int(self.iterations * 0.15),
+            'encircle_static': int(self.iterations * 0.15),
+            'local_search': int(self.iterations * 0.15),
+            'attack_dynamic': int(self.iterations * 0.10),
+            'attack_static': int(self.iterations * 0.10)
         }
 
         current_iter = 0
 
-        # Phase 1: Dynamic Search (v2.6: 恢复至10%)
+        # Phase 1: Dynamic Search
         for i in range(phase_iters['dynamic_search']):
             population = self.dynamic_search_phase(population, current_iter, self.iterations)
             self._update_best(population)
@@ -710,14 +623,9 @@ class BCBO_GA(BCBO_CloudScheduler):
             })
             current_iter += 1
 
-        # Phase 2: GA Enhancement (v2.6: 延迟至10%，保持18%时长)
-        for i in range(phase_iters['ga_enhancement']):
-            population = self.ga_enhancement_phase(population, current_iter)
-
-            # 温和负载均衡 (每20代)
-            if current_iter % 20 == 0:
-                population = self.gentle_load_balance_repair(population)
-
+        # Phase 2: Static Search
+        for i in range(phase_iters['static_search']):
+            population = self.static_search_phase(population, current_iter)
             self._update_best(population)
             self.fitness_history.append({
                 'iteration': current_iter + 1,
@@ -726,9 +634,14 @@ class BCBO_GA(BCBO_CloudScheduler):
             })
             current_iter += 1
 
-        # Phase 3: Static Search (v2.6: 保持5%)
-        for i in range(phase_iters['static_search']):
-            population = self.static_search_phase(population, current_iter)
+        # Phase 3: GA Enhancement
+        for i in range(phase_iters['ga_enhancement']):
+            population = self.ga_enhancement_phase(population, current_iter)
+
+            # 温和负载均衡 (每20代)
+            if current_iter % 20 == 0:
+                population = self.gentle_load_balance_repair(population)
+
             self._update_best(population)
             self.fitness_history.append({
                 'iteration': current_iter + 1,
@@ -759,7 +672,7 @@ class BCBO_GA(BCBO_CloudScheduler):
             })
             current_iter += 1
 
-        # Phase 6: Local Search Enhancement (v2.6: 调整至17%)
+        # Phase 6: Local Search Enhancement
         for i in range(phase_iters['local_search']):
             population = self.local_search_enhancement_phase(population, current_iter)
 
@@ -816,14 +729,11 @@ class BCBO_GA(BCBO_CloudScheduler):
             "is_feasible": True,
             # BCBO-GA特有统计
             "algorithm_name": "BCBO-GA",
-            "version": "v2.6",  # ⭐ 新增版本号
             "improvements": {
                 "ga_enhancement": True,
                 "local_search": True,
                 "gentle_load_balance": True,
-                "elite_preservation": True,
-                "cost_aware_optimization": True,
-                "balanced_vm_selection": True  # ⭐ v2.6新增
+                "elite_preservation": True
             },
             "statistics": {
                 "ga_improvements": self.ga_improvements,

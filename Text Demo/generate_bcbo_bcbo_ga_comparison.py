@@ -309,7 +309,7 @@ class BCBOComparisonGenerator:
         for run in range(runs_per_point):
             try:
                 # 使用固定seed确保所有算法比较相同的问题实例
-                run_seed = 42 + run
+                run_seed = self.random_seed + run
 
                 np.random.seed(run_seed)
                 random.seed(run_seed)
@@ -461,7 +461,7 @@ class BCBOComparisonGenerator:
                     for run in range(config['runs_per_point']):
                         try:
                             # 使用固定seed确保所有算法比较相同的问题实例
-                            run_seed = 42 + param_value + run
+                            run_seed = self.random_seed + param_value + run
 
                             np.random.seed(run_seed)
                             random.seed(run_seed)
